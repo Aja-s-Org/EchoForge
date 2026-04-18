@@ -1,0 +1,22 @@
+name: "🚀 Feature / User Story"
+description: "Propose a new capability for EchoForge."
+labels: ["type: feature", "status: triage"]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: User Story
+      placeholder: "As a [role], I want to [action], so that [benefit]."
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: "List the conditions that must be met for this to be 'Done'."
+      placeholder: "- [ ] C++ addon supports G.711 encoding\n- [ ] Nx library build passes on Linux/ARM"
+  - type: textarea
+    id: technical_notes
+    attributes:
+      label: Technical Implementation Notes
+      description: "Mention specific Nx libs or Terraform modules affected."

@@ -1,0 +1,23 @@
+name: "🐛 Bug Report"
+description: "Something isn't working in EchoForge."
+labels: ["type: bug", "priority: medium"]
+body:
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: "How can we trigger this bug?"
+      placeholder: "1. Run `nx serve voice-service`...\n2. Upload 24bit WAV file..."
+  - type: textarea
+    id: expected_actual
+    attributes:
+      label: Expected vs. Actual Result
+      description: "What should have happened vs. what happened (include C++ stack traces if available)."
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Execution Environment
+      options:
+        - "Local (macOS/Linux)"
+        - "AWS Lambda (Container)"
+        - "AWS Fargate"
