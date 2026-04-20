@@ -64,7 +64,7 @@
     "jest-util": "^30.0.2",
     "jiti": "2.4.2",
     "jsonc-eslint-parser": "^2.1.0",
-    "lint-staged": "^15.5.0",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.5.3",
     "ts-jest": "^29.4.0",
     "ts-node": "10.9.1",
