@@ -1,29 +1,29 @@
-name: "🛠 Technical Task / Spike"
-description: "Refactoring, Infrastructure, or Research (No direct user value)."
-labels: ["type: technical", "area: backend"]
+name: '🛠 Technical Task / Spike'
+description: 'Refactoring, Infrastructure, or Research (No direct user value).'
+labels: ['type: technical', 'area: backend']
 body:
   - type: input
     id: title
     attributes:
       label: Task Goal
-      placeholder: "Implement AsyncWorker for PCM streaming"
+      placeholder: 'Implement AsyncWorker for PCM streaming'
   - type: dropdown
     id: component
     attributes:
       label: Primary Component
       options:
-        - "libs/native-cloner (C++)"
-        - "apps/voice-service (Node.js)"
-        - "infrastructure/aws (Terraform)"
-        - "monorepo/tooling (Nx)"
-        - "packages/cli (TypeScript)"
+        - 'libs/native-cloner (C++)'
+        - 'apps/voice-service (Node.js)'
+        - 'infrastructure/aws (Terraform)'
+        - 'monorepo/tooling (Nx)'
+        - 'packages/cli (TypeScript)'
   - type: textarea
     id: research_plan
     attributes:
       label: Implementation/Research Plan
-      description: "If this is a Spike, what questions are we answering?"
+      description: 'If this is a Spike, what questions are we answering?'
   - type: textarea
     id: deliverables
     attributes:
       label: Expected Deliverables
-      description: "e.g., New Terraform module, C++ unit tests, Nx build target."
+      description: 'e.g., New Terraform module, C++ unit tests, Nx build target.'

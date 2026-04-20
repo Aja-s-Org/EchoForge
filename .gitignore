@@ -1,0 +1,43 @@
+node_modules/
+.vscode
+.env
+.DS_Store
+dist/
+
+# next.js
+.next/
+**/out/
+.swc
+
+# production
+build
+dist
+
+# misc
+.DS_Store
+.env*.local
+.idea
+.github-secrets
+.cache/
+
+# debug
+npm-debug.log*
+
+# monorepo cache
+.nx
+
+**/dist-lambda
+
+**/cdk.out
+
+**/coverage
+
+**/.last-artefact-upload-hash
+
+**/next-env.d.ts
+
+**/.vercel
+.vercel
+
+*.map
+packages/trixie-tasks/tsconfig.tsbuildinfo
