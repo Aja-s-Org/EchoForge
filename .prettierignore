@@ -1,0 +1,32 @@
+!jest.config.js
+!jest.config.mjs
+*.d.ts
+*.js
+node_modules
+.env
+.next
+
+# build
+build/
+dist/
+
+# testing
+.nyc_output
+coverage
+/log
+/results
+local.log
+/.vscode/launch.json
+
+# husky
+.husky/_
+
+# misc
+.DS_Store
+.eslintcache
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+**/swagger-docs

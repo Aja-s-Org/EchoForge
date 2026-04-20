@@ -1,0 +1,19 @@
+{
+  "name": "storage-utils",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/storage-utils/src",
+  "projectType": "library",
+  "tags": ["type:util"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/storage-utils",
+        "main": "packages/storage-utils/src/index.ts",
+        "tsConfig": "packages/storage-utils/tsconfig.lib.json",
+        "assets": ["packages/storage-utils/*.md"]
+      }
+    }
+  }
+}

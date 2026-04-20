@@ -1,12 +1,12 @@
-name: "🚀 Feature / User Story"
-description: "Propose a new capability for EchoForge."
-labels: ["type: feature", "status: triage"]
+name: '🚀 Feature / User Story'
+description: 'Propose a new capability for EchoForge.'
+labels: ['type: feature', 'status: triage']
 body:
   - type: input
     id: summary
     attributes:
       label: User Story
-      placeholder: "As a [role], I want to [action], so that [benefit]."
+      placeholder: 'As a [role], I want to [action], so that [benefit].'
     validations:
       required: true
   - type: textarea
@@ -19,4 +19,4 @@ body:
     id: technical_notes
     attributes:
       label: Technical Implementation Notes
-      description: "Mention specific Nx libs or Terraform modules affected."
+      description: 'Mention specific Nx libs or Terraform modules affected.'
