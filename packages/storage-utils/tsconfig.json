@@ -6,6 +6,7 @@
     "strict": true,
     "importHelpers": true,
     "noImplicitOverride": true,
+    "outDir": "./dist",
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noPropertyAccessFromIndexSignature": true
