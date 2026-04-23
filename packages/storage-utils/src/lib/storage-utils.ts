@@ -1,7 +1,6 @@
-import { getEchoForgeUrl } from './presigned-url';
+import { getUniversalPresignedUrl } from './presigned-url';
 
-export function storageUtils() {
-  return {
-    getEchoForgeUrl,
-  };
-}
+export {
+  getUniversalPresignedUrl
+};
+

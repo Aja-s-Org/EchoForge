@@ -1,5 +1,5 @@
 {
-  "name": "storage-utils",
+  "name": "@echoforge/storage-utils",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/storage-utils/src",
   "projectType": "library",
