@@ -15,9 +15,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "backend-api": ["apps/backend-api/src/index.ts"],
-      "core-engine": ["packages/core-engine/src/index.ts"],
-      "storage-utils": ["packages/storage-utils/src/index.ts"]
+      "@echoforge/backend-api": ["apps/backend-api/src/index.ts"],
+      "@echoforge/core-engine": ["packages/core-engine/src/index.ts"],
+      "@echoforge/storage-utils": ["packages/storage-utils/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
