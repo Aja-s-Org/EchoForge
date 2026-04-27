@@ -9,18 +9,18 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "es2015",
-    "module": "esnext",
+    "module": "node16",
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
+    "baseUrl": ".",
     "paths": {
-      "src/*": ["./src/*"],
-      "@echoforge/backend-api": ["./apps/backend-api/src/index.ts"],
-      "@echoforge/backend-api/*": ["./apps/backend-api/src/*"],
-      "@echoforge/core-engine": ["./packages/core-engine/src/index.ts"],
-      "@echoforge/core-engine/*": ["./packages/core-engine/src/*"],
-      "@echoforge/storage-utils": ["./packages/storage-utils/src/index.ts"],
-      "@echoforge/storage-utils/*": ["./packages/storage-utils/src/*"]
+      "@echoforge/backend-api": ["apps/backend-api/src/index.ts"],
+      "@echoforge/backend-api/*": ["apps/backend-api/src/*"],
+      "@echoforge/core-engine": ["packages/core-engine/src/index.ts"],
+      "@echoforge/core-engine/*": ["packages/core-engine/src/*"],
+      "@echoforge/storage-utils": ["packages/storage-utils/src/index.mts"],
+      "@echoforge/storage-utils/*": ["packages/storage-utils/src/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]
