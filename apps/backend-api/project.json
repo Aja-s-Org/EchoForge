@@ -1,7 +1,7 @@
 {
   "name": "backend-api",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/backend-api/src",
+  "sourceRoot": "./apps/backend-api/src",
   "projectType": "library",
   "tags": ["type:app"],
   "targets": {
@@ -9,10 +9,10 @@
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/apps/backend-api",
-        "main": "apps/backend-api/src/index.ts",
-        "tsConfig": "apps/backend-api/tsconfig.lib.json",
-        "assets": ["apps/backend-api/*.md"]
+        "outputPath": "./dist/apps/backend-api",
+        "main": "./apps/backend-api/src/index.ts",
+        "tsConfig": "./apps/backend-api/tsconfig.lib.json",
+        "assets": ["./apps/backend-api/*.md"]
       }
     }
   }

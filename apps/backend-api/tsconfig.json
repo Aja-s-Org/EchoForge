@@ -1,7 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "ignoreDeprecations": "6.0",
+    "composite": true,
+    "declaration": true,
+    "module": "node16",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "importHelpers": true,
@@ -11,13 +14,10 @@
     "noPropertyAccessFromIndexSignature": true
   },
   "files": [],
-  "include": [],
+  "include": ["./src/**/*.ts"],
   "references": [
-    {
-      "path": "./tsconfig.lib.json"
-    },
-    {
-      "path": "./tsconfig.spec.json"
-    }
+    { "path": "../../packages/storage-utils/tsconfig.lib.json" },
+    { "path": "./tsconfig.lib.json" },
+    { "path": "./tsconfig.spec.json" }
   ]
 }
