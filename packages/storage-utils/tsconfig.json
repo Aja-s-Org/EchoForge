@@ -1,6 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
     "composite": true,
     "declaration": true,
     "module": "node16",
@@ -8,13 +9,13 @@
     "strict": true,
     "importHelpers": true,
     "noImplicitOverride": true,
-    "outDir": "./dist",
+    "outDir": "dist",
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noPropertyAccessFromIndexSignature": true
   },
   "files": [],
-  "include": ["./src/**/*.ts"],
+  "include": ["src/**/*.ts"],
   "references": [
     {
       "path": "./tsconfig.lib.json"

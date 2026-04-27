@@ -2,6 +2,10 @@
   "name": "echoforge",
   "version": "0.0.0",
   "description": "Node.js and C++ Demo of a Voice Cloning App",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "homepage": "https://github.com/AjaSharma93/EchoForge#readme",
   "bugs": {
     "url": "https://github.com/AjaSharma93/EchoForge/issues"
@@ -69,7 +73,7 @@
     "ts-jest": "^29.4.0",
     "ts-node": "10.9.1",
     "tslib": "^2.3.0",
-    "typescript": "~5.7.2",
+    "typescript": "~6.0.3",
     "vite": "^7.0.0",
     "vitest": "^3.0.0"
   },
