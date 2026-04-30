@@ -2,7 +2,7 @@
   "name": "backend-api",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "./apps/backend-api/src",
-  "projectType": "library",
+  "projectType": "application",
   "tags": ["type:app"],
   "targets": {
     "build": {
@@ -10,11 +10,48 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "./dist/apps/backend-api",
-        "main": "./apps/backend-api/src/index.ts",
+        "main": "./apps/backend-api/src/main.ts",
         "tsConfig": "./apps/backend-api/tsconfig.lib.json",
         "assets": ["./apps/backend-api/*.md"],
         "generatePackageJson": true,
         "generateLockfile": true
+      }
+    },
+    "docker-build": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["build"],
+      "options": {
+        "command": "docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/echoforge-494507/echoforge-repo/backend-api:latest -f apps/backend-api/Dockerfile ."
+      }
+    },
+    "docker-push": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["docker-build"],
+      "options": {
+        "command": "docker push us-central1-docker.pkg.dev/echoforge-494507/echoforge-repo/backend-api:latest"
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "backend-api:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "backend-api:build:development"
+        },
+        "production": {
+          "buildTarget": "backend-api:build:production"
+        }
+      }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["docker-push"],
+      "options": {
+        "cwd": "infrastructure/gcp",
+        "command": "terraform init && terraform apply"
       }
     }
   }
