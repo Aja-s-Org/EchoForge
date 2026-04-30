@@ -12,7 +12,9 @@
         "outputPath": "./dist/apps/backend-api",
         "main": "./apps/backend-api/src/index.ts",
         "tsConfig": "./apps/backend-api/tsconfig.lib.json",
-        "assets": ["./apps/backend-api/*.md"]
+        "assets": ["./apps/backend-api/*.md"],
+        "generatePackageJson": true,
+        "generateLockfile": true
       }
     }
   }
