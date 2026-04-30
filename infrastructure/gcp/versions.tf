@@ -18,10 +18,8 @@ provider "google" {
   region  = var.gcp_region
 
   # Optional: Professional touch to tag all resources automatically
-  default_tags {
-    tags = {
-      Project   = "EchoForge"
-      ManagedBy = "Terraform"
-    }
+  default_labels = {
+    project    = "echoforge"
+    managed-by = "terraform"
   }
 }
