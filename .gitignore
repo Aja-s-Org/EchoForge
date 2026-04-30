@@ -44,3 +44,5 @@ packages/trixie-tasks/tsconfig.tsbuildinfo
 
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
+
+**/.terraform/

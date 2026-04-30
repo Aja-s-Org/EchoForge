@@ -11,3 +11,8 @@ variable "docker_image" {
   type = string
   description = "The URI of the Docker image from ECR"
 }
+
+variable "service_account_email" {
+  type        = string
+  description = "The service account email to run the Cloud Run container"
+}
