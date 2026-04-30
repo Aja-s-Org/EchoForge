@@ -13,15 +13,7 @@
     "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "@echoforge/backend-api": ["apps/backend-api/src/index.ts"],
-      "@echoforge/backend-api/*": ["apps/backend-api/src/*"],
-      "@echoforge/core-engine": ["packages/core-engine/src/index.ts"],
-      "@echoforge/core-engine/*": ["packages/core-engine/src/*"],
-      "@echoforge/storage-utils": ["packages/storage-utils/src/index.mts"],
-      "@echoforge/storage-utils/*": ["packages/storage-utils/src/*"]
-    }
+    "baseUrl": "."
   },
   "exclude": ["node_modules", "tmp"]
 }
