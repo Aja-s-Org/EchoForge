@@ -18,4 +18,4 @@ COPY dist/apps/backend-api .
 EXPOSE 3000
 
 # 7. Start the API
-CMD ["node", "main.js"]
+CMD ["node", "src/main.js"]
