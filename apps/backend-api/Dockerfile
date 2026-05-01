@@ -12,6 +12,7 @@ COPY dist/apps/backend-api/package*.json ./
 RUN npm ci --omit=dev
 
 # 5. Copy the compiled NestJS application code
+COPY dist/packages/storage-utils ./node_modules/@echoforge/storage-utils
 COPY dist/apps/backend-api .
 
 # 6. Expose the standard NestJS port
