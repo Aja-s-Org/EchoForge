@@ -46,3 +46,5 @@ vite.config.*.timestamp*
 vitest.config.*.timestamp*
 
 **/.terraform/
+**/terraform.tfstate
+**/terraform.tfstate.backup
