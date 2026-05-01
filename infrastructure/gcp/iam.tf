@@ -5,6 +5,13 @@ resource "google_service_account" "backend_sa" {
   description  = "Used by Cloud Run to generate pre-signed URLs and access Storage"
 }
 
+# Allow the backend Service Account to create Signed URLs
+resource "google_project_iam_member" "backend_sa_token_creator" {
+  project = var.gcp_project_id
+  role    = "roles/iam.serviceAccountTokenCreator"
+  member  = "serviceAccount:${google_service_account.backend_sa.email}"
+}
+
 # 2. Grant the Service Account permission to the Bucket
 resource "google_storage_bucket_iam_member" "storage_admin" {
   # Fix: Use the real resource name since we are in the root folder
