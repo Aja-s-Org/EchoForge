@@ -64,14 +64,55 @@ resource "aws_ecs_task_definition" "app" {
 # 4. The ECS Service (Keeps the container running)
 resource "aws_ecs_service" "main" {
   name            = "${var.app_name}-service"
-  cluster         = aws_ecs_cluster.main.id
+  cluster         = aws_ecs_cluster.echoforge_cluster.id
   task_definition = aws_ecs_task_definition.app.arn
   desired_count   = 1
   launch_type     = "FARGATE"
 
   network_configuration {
-    # Note: In a production setup, you'd pass your VPC subnets in as variables too
-    subnets          = var.public_subnets
+    subnets          = data.aws_subnets.default.ids   # Changed from var.public_subnets
+    security_groups  = [aws_security_group.ecs_sg.id] # NEW! Allows port 3000
     assign_public_ip = true
+  }
+}
+
+resource "aws_cloudwatch_log_group" "api_logs" {
+  name              = "/ecs/${var.app_name}"
+  retention_in_days = 14
+}
+
+# 1. Grab the Default VPC
+data "aws_vpc" "default" {
+  default = true
+}
+
+# 2. Grab the Default Subnets in that VPC
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
+  }
+}
+
+# 3. Create a Security Group to allow Port 3000 traffic
+resource "aws_security_group" "ecs_sg" {
+  name        = "${var.app_name}-sg"
+  description = "Allow inbound traffic to NestJS"
+  vpc_id      = data.aws_vpc.default.id
+
+  ingress {
+    description = "Allow Port 3000"
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description = "Allow all outbound traffic"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 }
