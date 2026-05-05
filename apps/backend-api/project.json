@@ -22,14 +22,30 @@
       "executor": "nx:run-commands",
       "dependsOn": ["build"],
       "options": {
-        "command": "docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/echoforge-494507/echoforge-repo/backend-api:latest -f apps/backend-api/Dockerfile ."
+        "command": "echo 'Please specify a cloud configuration: -c gcp or -c aws'"
+      },
+      "configurations": {
+        "gcp": {
+          "command": "docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/echoforge-494507/echoforge-repo/backend-api:latest -f apps/backend-api/Dockerfile ."
+        },
+        "aws": {
+          "command": "docker build --platform linux/amd64 -t 715841371829.dkr.ecr.us-east-1.amazonaws.com/echoforge-api:latest -f apps/backend-api/Dockerfile ."
+        }
       }
     },
     "docker-push": {
       "executor": "nx:run-commands",
       "dependsOn": ["docker-build"],
       "options": {
-        "command": "docker push us-central1-docker.pkg.dev/echoforge-494507/echoforge-repo/backend-api:latest"
+        "command": "echo 'Please specify a cloud configuration: -c gcp or -c aws'"
+      },
+      "configurations": {
+        "gcp": {
+          "command": "docker push us-central1-docker.pkg.dev/echoforge-494507/echoforge-repo/backend-api:latest"
+        },
+        "aws": {
+          "command": "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 715841371829.dkr.ecr.us-east-1.amazonaws.com && docker push 715841371829.dkr.ecr.us-east-1.amazonaws.com/echoforge-api:latest"
+        }
       }
     },
     "serve": {
