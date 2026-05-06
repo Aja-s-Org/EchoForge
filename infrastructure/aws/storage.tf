@@ -6,6 +6,18 @@ resource "random_id" "bucket_suffix" {
 # 2. Create the actual bucket (The "Origin")
 resource "aws_s3_bucket" "samples" {
   bucket = "echoforge-samples-${random_id.bucket_suffix.hex}"
+
+  rule {
+    id     = "ephemeral-files-1-day"
+    status = "Enabled"
+
+    # An empty filter tells AWS to apply this rule to EVERY file in the bucket
+    filter {}
+
+    expiration {
+      days = 1
+    }
+  }
   
   # Ensure the bucket is destroyed even if it contains files (handy for demos)
   force_destroy = true 

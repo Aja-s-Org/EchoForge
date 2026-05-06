@@ -9,6 +9,15 @@ resource "google_storage_bucket" "samples" {
   location      = "US" # Multi-region or a specific region like "US-CENTRAL1"
   force_destroy = true
 
+  lifecycle_rule {
+    condition {
+      age = 1 # days
+    }
+    action {
+      type = "Delete"
+    }
+  }
+
   uniform_bucket_level_access = true
 
   # 3. CRITICAL: CORS configuration for your Frontend
