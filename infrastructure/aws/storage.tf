@@ -20,7 +20,7 @@ resource "aws_s3_bucket_cors_configuration" "samples_cors" {
     allowed_headers = ["*"]
     
     # PUT is critical for the pre-signed upload. OPTIONS is for the pre-flight check.
-    allowed_methods = ["GET", "PUT", "POST", "OPTIONS"]
+    allowed_methods = ["GET", "PUT", "POST"]
     
     # Restrict this to your actual frontend URLs in production!
     allowed_origins = ["http://localhost:4200", "https://your-production-domain.com"]
