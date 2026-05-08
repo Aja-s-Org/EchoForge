@@ -1,0 +1,62 @@
+name: Build & Test PR 🧪
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+concurrency: echoforge-pr-${{ github.event.pull_request.head.ref}}
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+  statuses: read
+  checks: read
+  actions: read
+jobs:
+  build-and-test:
+    if: ${{ !startsWith( github.event.pull_request.head.ref, 'release-please-' ) }}
+    uses: ./.github/workflows/build-test-common.yml
+    with:
+      ref: ${{ github.event.pull_request.head.ref }}
+      commit_sha: ${{ github.event.pull_request.head.sha }}
+      is_default_branch: false
+    secrets: inherit
+  dependabot-auto-merge:
+    needs: build-and-test
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: approve Dependabot PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr review --approve ${{ github.event.pull_request.html_url }} --body "Auto approved by CI"
+      - name: Enable auto-merge for Dependabot PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr merge --auto --squash ${{ github.event.pull_request.html_url }}
+  lint-commits:
+    if: ${{ github.actor != 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .github/workflows/.node-version
+          cache: 'npm'
+      - run: |
+          npm i @commitlint/cli @commitlint/config-conventional conventional-commit-types conventional-changelog-angular
+          npx commitlint \
+          --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} \
+          --to ${{ github.event.pull_request.head.sha }} \
+          --verbose
