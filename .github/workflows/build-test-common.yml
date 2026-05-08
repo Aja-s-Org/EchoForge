@@ -1,0 +1,137 @@
+name: Build & Test Common 🧪
+on:
+  workflow_call:
+    inputs:
+      ref:
+        required: true
+        type: string
+      commit_sha:
+        required: true
+        type: string
+      is_default_branch:
+        required: true
+        type: boolean
+    outputs:
+      releaseSha:
+        value: ${{ jobs.semantic-release.outputs.latestGitRef }}
+
+env:
+  NX_REJECT_UNKNOWN_LOCAL_CACHE: 0
+
+jobs:
+  lint:
+    name: eslint check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .github/workflows/.node-version
+          cache: 'npm'
+      - name: install
+        run: |
+          npm ci
+      - name: build
+        run: |
+          npm run build
+      - name: eslint check
+        run: |
+          export NODE_OPTIONS=--max_old_space_size=4096
+          npm run lint
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      awsRoleArn: ${{ steps[inputs.environment].outputs.awsRoleArn }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Checkout main branch for nx
+        run: |
+          git fetch --no-tags --prune --depth=1 origin main
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .github/workflows/.node-version
+          cache: 'npm'
+      - name: cache Nx
+        uses: actions/cache@v4
+        with:
+          path: .nx/cache
+          key: cache-nx-${{ hashFiles('package-lock.json') }}-build-test-${{github.event.pull_request.number}}-${{ github.sha }}
+          restore-keys: |
+            cache-nx-${{ hashFiles('package-lock.json') }}-build-test-${{github.event.pull_request.number}}-
+      - name: install
+        run: |
+          npm ci
+      - name: build
+        run: |
+          npm run build
+      - name: test
+        run: |
+          npm run test
+      - name: Comment Code Coverage on PR
+        uses: dkhunt27/action-nx-code-coverage@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          no-coverage-ran: false
+          coverage-folder: ./coverage
+          gist-processing: false
+          color: green
+          named-logo: jest
+          hide-coverage-reports: false
+          hide-unchanged: false
+
+  semantic-release:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    outputs:
+      latestGitRef: ${{ steps.git-ref.outputs.latestGitRef }}
+    timeout-minutes: 5
+    if: inputs.is_default_branch
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .github/workflows/.node-version
+          cache: 'npm'
+      - name: Cache Nx
+        uses: actions/cache@v4
+        with:
+          path: .nx/cache
+          key: cache-nx-${{ hashFiles('package-lock.json') }}-semver-release-${{ github.sha }}
+          restore-keys: |
+            cache-nx-${{ hashFiles('package-lock.json') }}-semver-release-
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.OPERATIONS_CLIENT_ID }}
+          private-key: ${{ secrets.OPERATIONS_PRIVATE_KEY }}
+      - name: set remote
+        run: |
+          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/$GITHUB_REPOSITORY
+      - name: semver release
+        id: semver-release
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 919191+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 919191+github-actions[bot]@users.noreply.github.com
+          HUSKY: 0
+        run: |
+          npm ci
+          npm run build
+          npm run release
+          cat package.json | jq -r '.version'
+          echo "semver=$(cat package.json | jq -r '.version')" >> $GITHUB_OUTPUT
+      - name: get latest git ref
+        id: git-ref
+        run: |
+          echo "latestGitRef=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT

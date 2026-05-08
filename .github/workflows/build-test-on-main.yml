@@ -1,0 +1,26 @@
+name: Build & Test Main 🧪
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'CONTRIBUTING.md'
+      - '**/README.md'
+concurrency: main-${{ github.ref}}-${{ github.event_name }}
+permissions:
+  contents: write
+  deployments: write
+  id-token: write
+  pull-requests: read
+  statuses: read
+  checks: read
+  actions: read
+jobs:
+  build-and-test:
+    if: ${{ !startsWith( github.event.head_commit.message, 'chore(release)' ) }}
+    uses: ./.github/workflows/build-test-common.yml
+    with:
+      ref: ${{ github.ref }}
+      commit_sha: ${{ github.sha }}
+      is_default_branch: true
+    secrets: inherit
