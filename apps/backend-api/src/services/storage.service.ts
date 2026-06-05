@@ -8,15 +8,17 @@ export class StorageService {
     const bucket =
       process.env['ECHOFORGE_SAMPLES_BUCKET'] ?? 'echoforge-samples';
 
+    const storedFileName = `uploads/${Date.now()}-${fileName}`;
+
     const url = await getUniversalPresignedUrl(
       provider,
       bucket,
-      `uploads/${Date.now()}-${fileName}`,
+      storedFileName,
       'write',
-      Date.now() + 300 * 1000, // 5 minute window,
+      Date.now() + 300 * 1000, // 5 minute window
       contentType
     );
 
-    return { uploadUrl: url };
+    return { uploadUrl: url, fileName: storedFileName };
   }
 }
