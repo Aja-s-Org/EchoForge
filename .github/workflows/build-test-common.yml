@@ -43,8 +43,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    outputs:
-      awsRoleArn: ${{ steps[inputs.environment].outputs.awsRoleArn }}
     steps:
       - uses: actions/checkout@v6
         with:
