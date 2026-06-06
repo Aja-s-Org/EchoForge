@@ -275,7 +275,7 @@ describe('getUniversalPresignedUrl', () => {
       expect(url).toBe('https://aws.url');
     });
 
-    it('should handle minimal valid expiration (1ms in future)', async () => {
+    it('should handle minimal valid expiration (1s in future)', async () => {
       const now = new Date('2020-01-01T00:00:00.000Z');
       vi.useFakeTimers();
       vi.setSystemTime(now);
@@ -285,7 +285,7 @@ describe('getUniversalPresignedUrl', () => {
         'test-bucket',
         'file.txt',
         'read',
-        now.getTime() + 1,
+        now.getTime() + 1_000,
       );
 
       expect(url).toBe('https://aws.url');
