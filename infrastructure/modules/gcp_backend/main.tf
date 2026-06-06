@@ -1,7 +1,7 @@
 # 1. The Cloud Run Service (Your NestJS Container)
 resource "google_cloud_run_v2_service" "api" {
   name     = "${var.app_name}-api"
-  location = "us-central1" # You can also pass this in as a variable for more flexibility
+  location = var.gcp_region
   
   # Cloud Run v2 handles ingress routing elegantly
   ingress = "INGRESS_TRAFFIC_ALL"
