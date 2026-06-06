@@ -6,14 +6,14 @@ import {
   UnprocessableEntityException,
   UsePipes,
 } from '@nestjs/common';
-import { ZodValidationPipe } from '../pipes/zod-validation.pipe.js';
-import { StorageService } from '../services/storage.service.js';
+import { ZodValidationPipe } from '../pipes/zod-validation.pipe';
+import { StorageService } from '../services/storage.service';
 import {
   ProcessVoiceDto,
   ProcessVoiceSchema,
   RequestUploadDto,
   RequestUploadSchema,
-} from './dto/voice.schemas.js';
+} from './dto/voice.schemas';
 
 @Controller('voice')
 export class AppController {
