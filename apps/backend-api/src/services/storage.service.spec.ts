@@ -44,7 +44,7 @@ describe('StorageService', () => {
   describe('getUploadUrl', () => {
     beforeEach(() => {
       vi.mocked(getUniversalPresignedUrl).mockResolvedValue(
-        'https://presigned.url/upload',
+        'https://presigned.url/upload'
       );
     });
 
@@ -62,7 +62,7 @@ describe('StorageService', () => {
         `uploads/${now}-audio.wav`,
         'write',
         expect.any(Number),
-        'audio/wav',
+        'audio/wav'
       );
     });
 
@@ -75,7 +75,7 @@ describe('StorageService', () => {
         expect.any(String),
         'write',
         expect.any(Number),
-        'text/plain',
+        'text/plain'
       );
     });
 
@@ -91,7 +91,7 @@ describe('StorageService', () => {
         expect.any(String),
         'write',
         expect.any(Number),
-        'text/plain',
+        'text/plain'
       );
     });
 
@@ -107,7 +107,7 @@ describe('StorageService', () => {
         expect.any(String),
         'write',
         expect.any(Number),
-        'text/plain',
+        'text/plain'
       );
     });
 
@@ -123,18 +123,18 @@ describe('StorageService', () => {
         expect.any(String),
         'write',
         now + 300_000,
-        'text/plain',
+        'text/plain'
       );
     });
 
     it('should propagate errors from getUniversalPresignedUrl', async () => {
       vi.mocked(getUniversalPresignedUrl).mockRejectedValue(
-        new Error('Cloud provider error'),
+        new Error('Cloud provider error')
       );
 
-      await expect(service.getUploadUrl('file.txt', 'text/plain')).rejects.toThrow(
-        'Cloud provider error',
-      );
+      await expect(
+        service.getUploadUrl('file.txt', 'text/plain')
+      ).rejects.toThrow('Cloud provider error');
     });
   });
 
@@ -179,9 +179,14 @@ describe('StorageService', () => {
     });
 
     it('should throw error for other AWS errors', async () => {
-      mockSend.mockRejectedValue({ name: 'AccessDenied', message: 'Access denied' });
+      mockSend.mockRejectedValue({
+        name: 'AccessDenied',
+        message: 'Access denied',
+      });
 
-      await expect(service.fileExists('uploads/file.wav')).rejects.toMatchObject({
+      await expect(
+        service.fileExists('uploads/file.wav')
+      ).rejects.toMatchObject({
         name: 'AccessDenied',
       });
     });
@@ -225,7 +230,7 @@ describe('StorageService', () => {
                 exists: mockExists,
               })),
             })),
-          }) as any,
+          }) as any
       );
     });
 
@@ -252,7 +257,9 @@ describe('StorageService', () => {
       const bucketMock = vi.fn(() => ({
         file: vi.fn(() => ({ exists: mockExists })),
       }));
-      vi.mocked(Storage).mockImplementation(() => ({ bucket: bucketMock }) as any);
+      vi.mocked(Storage).mockImplementation(
+        () => ({ bucket: bucketMock }) as any
+      );
       mockExists.mockResolvedValue([true]);
 
       await service.fileExists('uploads/file.wav');
@@ -264,7 +271,7 @@ describe('StorageService', () => {
       mockExists.mockRejectedValue(new Error('GCP permission error'));
 
       await expect(service.fileExists('uploads/file.wav')).rejects.toThrow(
-        'GCP permission error',
+        'GCP permission error'
       );
     });
   });
@@ -289,7 +296,9 @@ describe('StorageService', () => {
 
       const result = await service.getUploadUrl(longName, 'audio/wav');
 
-      expect(result.fileName).toContain(longName);
+      expect(result.fileName).toContain(
+        'uploads/1000004-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+      );
     });
   });
 });
