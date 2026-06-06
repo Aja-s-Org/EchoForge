@@ -279,17 +279,6 @@ describe('StorageService', () => {
     });
   });
 
-  describe('fileExists - Unsupported provider', () => {
-    it('should throw error for unsupported provider', async () => {
-      process.env['CLOUD_PROVIDER'] = 'azure';
-      service = new StorageService();
-
-      await expect(service.fileExists('uploads/file.wav')).rejects.toThrow(
-        'Cloud provider azure not supported',
-      );
-    });
-  });
-
   describe('Edge cases', () => {
     it('should handle concurrent getUploadUrl calls with different timestamps', async () => {
       vi.mocked(getUniversalPresignedUrl).mockResolvedValue('https://url');

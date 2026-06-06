@@ -127,21 +127,6 @@ try {
 }
 ```
 
-### Unsupported Provider
-```typescript
-try {
-  await getUniversalPresignedUrl(
-    'azure' as any,  // Not supported
-    'bucket',
-    'file.txt',
-    'read',
-    Date.now() + 300_000
-  );
-} catch (error) {
-  // Error: Cloud provider azure not supported by EchoForge.
-}
-```
-
 ## Testing
 
 The package includes 14 comprehensive unit tests covering:
