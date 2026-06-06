@@ -4,7 +4,6 @@ import { AppModule } from './app/app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Standard Nx setup usually sets a global prefix like /api
   const globalPrefix = 'api';
   app.setGlobalPrefix(globalPrefix);
 

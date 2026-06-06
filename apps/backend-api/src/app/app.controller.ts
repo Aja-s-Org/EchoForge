@@ -37,7 +37,6 @@ export class AppController {
       );
     }
 
-    // TODO: wire up processing logic
     return { status: 'ok' };
   }
 }
