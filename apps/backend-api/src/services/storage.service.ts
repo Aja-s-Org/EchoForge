@@ -5,6 +5,19 @@ import { Storage } from '@google-cloud/storage';
 
 @Injectable()
 export class StorageService {
+  private sanitizeFileName(fileName: string): string {
+    const normalizedFileName = fileName
+      .replace(/[\u0000-\u001f\u007f]/g, '')
+      .replace(/[\\/]/g, '-')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/[^a-zA-Z0-9._ -]/g, '-')
+      .replace(/[- ]+/g, '-')
+      .replace(/^[.-]+|[.-]+$/g, '')
+      .slice(0, 100);
+    return normalizedFileName || 'file';
+  }
+
   private get provider(): 'aws' | 'gcp' {
     const provider = process.env['CLOUD_PROVIDER'];
     if (provider === 'aws' || provider === 'gcp') return provider;
@@ -16,7 +29,7 @@ export class StorageService {
   }
 
   async getUploadUrl(fileName: string, contentType: string) {
-    const storedFileName = `uploads/${Date.now()}-${fileName}`;
+    const storedFileName = `uploads/${Date.now()}-${this.sanitizeFileName(fileName)}`;
 
     const url = await getUniversalPresignedUrl(
       this.provider,
@@ -24,7 +37,7 @@ export class StorageService {
       storedFileName,
       'write',
       Date.now() + 300 * 1000,
-      contentType,
+      contentType
     );
 
     return { uploadUrl: url, fileName: storedFileName };
@@ -36,9 +49,7 @@ export class StorageService {
         region: process.env['AWS_REGION'] ?? 'us-east-1',
       });
       try {
-        await s3.send(
-          new HeadObjectCommand({ Bucket: this.bucket, Key: key }),
-        );
+        await s3.send(new HeadObjectCommand({ Bucket: this.bucket, Key: key }));
         return true;
       } catch (err: unknown) {
         const code = (err as { name?: string })?.name;
