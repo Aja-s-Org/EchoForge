@@ -55,9 +55,7 @@ resource "google_cloud_run_v2_service_iam_member" "noauth" {
   location = google_cloud_run_v2_service.api.location
   project  = google_cloud_run_v2_service.api.project
   name     = google_cloud_run_v2_service.api.name
-
-  role   = "roles/run.invoker"
-  member = "allUsers"
+  policy_data = data.google_iam_policy.noauth.policy_data
 }
 
 # 3. Output the generated URL so you can hit it from your frontend
