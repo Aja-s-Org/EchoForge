@@ -8,8 +8,8 @@ variable "bucket_name" {
 }
 
 variable "docker_image" {
-  type = string
-  description = "The URI of the Docker image from ECR"
+  type        = string
+  description = "The URI of the Docker image (e.g. from Artifact Registry)"
 }
 
 variable "service_account_email" {
