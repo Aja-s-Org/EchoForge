@@ -12,5 +12,9 @@
     "@nestjs/platform-express": "^11.1.19",
     "tslib": "^2.3.0",
     "zod": "^3.24.2"
+  },
+  "scripts": {
+    "test": "nx test backend-api",
+    "test:coverage": "nx coverage backend-api"
   }
 }

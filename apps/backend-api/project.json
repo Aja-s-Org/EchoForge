@@ -91,6 +91,28 @@
           "cwd": "infrastructure/aws"
         }
       }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/apps/backend-api"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/apps/backend-api"
+      }
+    },
+    "coverage": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/apps/backend-api"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/apps/backend-api",
+        "coverage": {
+          "enabled": true,
+          "provider": "v8",
+          "reportsDirectory": "../../coverage/apps/backend-api",
+          "reporter": ["text", "json", "html", "json-summary"]
+        }
+      }
     }
   }
 }

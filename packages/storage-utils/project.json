@@ -14,6 +14,28 @@
         "tsConfig": "./packages/storage-utils/tsconfig.lib.json",
         "assets": ["./packages/storage-utils/*.md"]
       }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/packages/storage-utils"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/packages/storage-utils"
+      }
+    },
+    "coverage": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/packages/storage-utils"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/packages/storage-utils",
+        "coverage": {
+          "enabled": true,
+          "provider": "v8",
+          "reportsDirectory": "../../coverage/packages/storage-utils",
+          "reporter": ["text", "json", "html", "json-summary"]
+        }
+      }
     }
   }
 }
