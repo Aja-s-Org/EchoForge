@@ -1,5 +1,5 @@
 variable "app_name" {
-  default = "echoforge-aws-backend"
+  default = "echoforge-gcp-backend"
 }
 
 variable "bucket_name" {
