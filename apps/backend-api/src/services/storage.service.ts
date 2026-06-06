@@ -21,7 +21,7 @@ export class StorageService {
       this.bucket,
       storedFileName,
       'write',
-      Date.now() + 300 * 1000, // 5 minute window
+      Date.now() + 300 * 1000,
       contentType,
     );
 
