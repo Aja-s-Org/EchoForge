@@ -276,17 +276,21 @@ describe('getUniversalPresignedUrl', () => {
     });
 
     it('should handle minimal valid expiration (1ms in future)', async () => {
-      const justFuture = Date.now() + 1;
+      const now = new Date('2020-01-01T00:00:00.000Z');
+      vi.useFakeTimers();
+      vi.setSystemTime(now);
 
       const url = await getUniversalPresignedUrl(
         'aws',
         'test-bucket',
         'file.txt',
         'read',
-        justFuture,
+        now.getTime() + 1,
       );
 
       expect(url).toBe('https://aws.url');
+
+      vi.useRealTimers();
     });
   });
 });
