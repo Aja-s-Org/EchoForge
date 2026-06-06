@@ -20,6 +20,7 @@ export default defineConfig(() => ({
     coverage: {
       reportsDirectory: '../../coverage/apps/backend-api',
       provider: 'v8' as const,
+      reporter: ['text', 'json', 'html', 'json-summary'],
     },
   },
 }));

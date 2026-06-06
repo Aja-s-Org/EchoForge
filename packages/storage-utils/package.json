@@ -10,5 +10,9 @@
     "@aws-sdk/s3-request-presigner": "^3.1033.0",
     "@google-cloud/storage": "^7.19.0",
     "tslib": "^2.3.0"
+  },
+  "scripts": {
+    "test": "nx test @echoforge/storage-utils",
+    "test:coverage": "nx coverage @echoforge/storage-utils"
   }
 }
