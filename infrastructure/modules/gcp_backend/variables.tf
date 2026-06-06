@@ -16,3 +16,8 @@ variable "service_account_email" {
   type        = string
   description = "The service account email to run the Cloud Run container"
 }
+
+variable "gcp_region" {
+  type        = string
+  description = "The GCP region where Cloud Run resources are deployed"
+}
