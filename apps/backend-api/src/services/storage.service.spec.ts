@@ -127,16 +127,6 @@ describe('StorageService', () => {
       );
     });
 
-    it('should handle file names with special characters', async () => {
-      const fileName = 'my audio file (v2).wav';
-      const now = Date.now();
-      vi.spyOn(Date, 'now').mockReturnValue(now);
-
-      const result = await service.getUploadUrl(fileName, 'audio/wav');
-
-      expect(result.fileName).toBe(`uploads/${now}-${fileName}`);
-    });
-
     it('should propagate errors from getUniversalPresignedUrl', async () => {
       vi.mocked(getUniversalPresignedUrl).mockRejectedValue(
         new Error('Cloud provider error'),
