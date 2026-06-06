@@ -6,7 +6,9 @@ import { Storage } from '@google-cloud/storage';
 @Injectable()
 export class StorageService {
   private get provider(): 'aws' | 'gcp' {
-    return (process.env['CLOUD_PROVIDER'] as 'aws' | 'gcp') ?? 'aws';
+    const provider = process.env['CLOUD_PROVIDER'];
+    if (provider === 'aws' || provider === 'gcp') return provider;
+    return 'aws';
   }
 
   private get bucket(): string {
