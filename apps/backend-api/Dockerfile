@@ -1,5 +1,5 @@
 # 1. Use a lightweight, hardened Node base image
-FROM docker.io/node:20-alpine
+FROM docker.io/node:24-alpine
 
 # 2. Set the working directory inside the container
 WORKDIR /app
