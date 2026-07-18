@@ -1,0 +1,21 @@
+# Build artifacts
+dist/
+coverage/
+node_modules/
+
+# Compiled C++ files
+*.o
+*.so
+*.node
+*.dylib
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+
+# Test files
+*.log
+*.tmp

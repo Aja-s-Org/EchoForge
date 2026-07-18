@@ -1,0 +1,2 @@
+/usr/bin/ar qc libvoice_cloning_core.a "CMakeFiles/voice_cloning_core.dir/Users/ajasharma/Documents/EchoForge/packages/voice-cloning-addon/src/cpp/audio_processor.cc.o" "CMakeFiles/voice_cloning_core.dir/Users/ajasharma/Documents/EchoForge/packages/voice-cloning-addon/src/cpp/config_manager.cc.o" "CMakeFiles/voice_cloning_core.dir/Users/ajasharma/Documents/EchoForge/packages/voice-cloning-addon/src/cpp/f5_tts_wrapper.cc.o"
+/usr/bin/ranlib libvoice_cloning_core.a

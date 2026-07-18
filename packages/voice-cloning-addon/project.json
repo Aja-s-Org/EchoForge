@@ -1,0 +1,40 @@
+{
+  "name": "@echoforge/voice-cloning-addon",
+  "sourceRoot": "./packages/voice-cloning-addon/src",
+  "projectType": "library",
+  "tags": ["type:addon", "type:native"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "./dist/packages/voice-cloning-addon",
+        "main": "./packages/voice-cloning-addon/src/index.ts",
+        "tsConfig": "./packages/voice-cloning-addon/tsconfig.lib.json",
+        "assets": ["./packages/voice-cloning-addon/*.md"]
+      }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/packages/voice-cloning-addon"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/packages/voice-cloning-addon"
+      }
+    },
+    "coverage": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{workspaceRoot}/coverage/packages/voice-cloning-addon"],
+      "options": {
+        "passWithNoTests": true,
+        "reportsDirectory": "../../coverage/packages/voice-cloning-addon",
+        "coverage": {
+          "enabled": true,
+          "provider": "v8",
+          "reportsDirectory": "../../coverage/packages/voice-cloning-addon",
+          "reporter": ["text", "json", "html", "json-summary"]
+        }
+      }
+    }
+  }
+}

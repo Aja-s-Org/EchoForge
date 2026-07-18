@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/test_core.dir/test_core.cc.o -o test_core  -Wl,-rpath,/opt/homebrew/lib libvoice_cloning_core.a /opt/homebrew/lib/libsndfile.1.0.37.dylib
