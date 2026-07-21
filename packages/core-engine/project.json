@@ -7,11 +7,56 @@
       "dependsOn": [],
       "executor": "nx:noop",
       "options": {
-        "command": "cmake-js compile",
+        "command": "npm run build:native",
         "cwd": "packages/core-engine"
       },
-      "outputs": ["{projectRoot}/build/Release/echoforge_core.node"]
+      "outputs": ["{projectRoot}/build/Release/echoforge_core.node"],
+      "configurations": {
+        "production": {
+          "command": "npm run build:native --production"
+        },
+        "development": {
+          "command": "npm run build:native --debug"
+        }
+      }
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "executor": "nx:noop",
+      "options": {
+        "command": "npm test",
+        "cwd": "packages/core-engine"
+      }
+    },
+    "lint": {
+      "executor": "nx:noop",
+      "options": {
+        "command": "npx eslint src/**/*.ts",
+        "cwd": "packages/core-engine"
+      }
+    },
+    "clean": {
+      "executor": "nx:noop",
+      "options": {
+        "command": "npm run clean",
+        "cwd": "packages/core-engine"
+      },
+      "outputs": ["{projectRoot}/build"]
+    },
+    "setup-python": {
+      "executor": "nx:noop",
+      "options": {
+        "command": "npm run setup:python",
+        "cwd": "packages/core-engine"
+      }
+    },
+    "setup-python-gpu": {
+      "executor": "nx:noop",
+      "options": {
+        "command": "npm run setup:python:gpu",
+        "cwd": "packages/core-engine"
+      }
     }
   },
-  "tags": ["type:native"]
+  "tags": ["type:native", "scope:core", "feature:voice-cloning"]
 }
