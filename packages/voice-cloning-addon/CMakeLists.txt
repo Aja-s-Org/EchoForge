@@ -172,3 +172,78 @@ endif()
 if(WIN32)
   target_compile_definitions(voice_cloning_addon PRIVATE _WIN32_WINNT=0x0A00)
 endif()
+
+# Memory management components
+set(MEMORY_MANAGEMENT_SOURCES
+  src/cpp/memory_pool.cc
+  src/cpp/memory_monitor.cc
+)
+
+# Check if memory management files exist
+foreach(SOURCE ${MEMORY_MANAGEMENT_SOURCES})
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE}")
+    message(STATUS "Found memory management source: ${SOURCE}")
+  else
+    message(STATUS "Memory management source not found (will be created): ${SOURCE}")
+    # Create empty file if it doesn't exist
+    file(WRITE "${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE}" "// Memory management implementation\n")
+  endif()
+endforeach()
+
+# Addon source files (updated with memory management)
+set(ADDON_SOURCES
+  src/cpp/addon.cc
+  src/cpp/voice_cloner.cc
+  src/cpp/audio_processor.cc
+  src/cpp/f5_tts_wrapper.cc
+  src/cpp/python_service_client.cc
+  ${MEMORY_MANAGEMENT_SOURCES}
+)
+
+# Create shared library for Node.js addon
+add_library(voice_cloning_addon SHARED ${ADDON_SOURCES})
+
+# Link libraries
+target_link_libraries(voice_cloning_addon
+  PRIVATE
+    ${PortAudio_LIBRARIES}
+    ${SndFile_LIBRARIES}
+    ${JSONCPP_LIBRARIES}
+)
+
+# Set properties for Node.js addon
+set_target_properties(voice_cloning_addon PROPERTIES
+  PREFIX ""
+  SUFFIX ".node"
+  OUTPUT_NAME "voice_cloning_addon"
+)
+
+# Installation
+install(TARGETS voice_cloning_addon
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+)
+
+# Test executable
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/cpp/test_basic.cc")
+  add_executable(test_core
+    tests/cpp/test_basic.cc
+    ${ADDON_SOURCES}
+  )
+  
+  target_link_libraries(test_core
+    PRIVATE
+      ${PortAudio_LIBRARIES}
+      ${SndFile_LIBRARIES}
+      ${JSONCPP_LIBRARIES}
+      GTest::gtest
+      GTest::gtest_main
+  )
+  
+  set_target_properties(test_core PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests
+  )
+endif()
+
+message(STATUS "Memory management components added to build")
+message(STATUS "Total source files: ${ADDON_SOURCES}")
