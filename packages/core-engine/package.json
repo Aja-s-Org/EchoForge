@@ -1,0 +1,40 @@
+{
+  "name": "@echoforge/core-engine",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "dependencies": {
+    "tslib": "^2.3.0",
+    "@types/python-shell": "^3.0.6",
+    "python-shell": "^5.0.0",
+    "node-addon-api": "^7.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "node-gyp": "^10.0.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.1.1",
+    "rimraf": "^5.0.5",
+    "fast-check": "^3.14.0"
+  },
+  "scripts": {
+    "test": "nx test @echoforge/core-engine",
+    "test:coverage": "nx coverage @echoforge/core-engine",
+    "build": "nx build @echoforge/core-engine",
+    "build:native": "node-gyp rebuild",
+    "clean": "rimraf build",
+    "install": "node-gyp rebuild",
+    "setup:python": "cd ../../third_party/f5-tts && pip install -e .",
+    "setup:python:gpu": "cd ../../third_party/f5-tts && pip install -e .[gpu]",
+    "check:memory": "./scripts/check_memory.sh"
+  },
+  "gypfile": true
+}
