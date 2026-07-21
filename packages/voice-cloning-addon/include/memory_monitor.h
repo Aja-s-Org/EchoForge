@@ -1,299 +1,250 @@
 #ifndef MEMORY_MONITOR_H
 #define MEMORY_MONITOR_H
 
-#include <vector>
 #include <string>
+#include <unordered_map>
+#include <vector>
 #include <memory>
 #include <mutex>
 #include <chrono>
-#include <atomic>
 #include <functional>
-#include <unordered_map>
-#include "logger.h"
+#include <cstddef>
 
 namespace memory {
 
 /**
  * @brief Memory usage statistics for a component
  */
-struct ComponentMemoryStats {
-  std::string component_name;
-  size_t current_usage;
-  size_t peak_usage;
-  size_t allocation_count;
-  size_t free_count;
-  size_t leak_count;
-  std::chrono::steady_clock::time_point last_update;
+struct ComponentStats {
+  std::string name;
+  size_t current_bytes = 0;
+  size_t peak_bytes = 0;
+  size_t allocation_count = 0;
+  size_t deallocation_count = 0;
+  size_t total_allocated_bytes = 0;
+  std::chrono::steady_clock::time_point last_allocation;
+  std::chrono::steady_clock::time_point last_deallocation;
   
-  ComponentMemoryStats() : component_name(""), current_usage(0), peak_usage(0),
-                          allocation_count(0), free_count(0), leak_count(0) {}
-  
-  ComponentMemoryStats(const std::string& name) : component_name(name),
-    current_usage(0), peak_usage(0), allocation_count(0), free_count(0),
-    leak_count(0) {
-    last_update = std::chrono::steady_clock::now();
+  // Derived metrics
+  double average_allocation_size() const {
+    if (allocation_count == 0) return 0.0;
+    return static_cast<double>(total_allocated_bytes) / allocation_count;
   }
   
-  void update_peak() {
-    if (current_usage > peak_usage) {
-      peak_usage = current_usage;
+  size_t net_allocation() const {
+    return total_allocated_bytes - (deallocation_count * average_allocation_size());
+  }
+  
+  void update_allocation(size_t bytes) {
+    current_bytes += bytes;
+    total_allocated_bytes += bytes;
+    allocation_count++;
+    last_allocation = std::chrono::steady_clock::now();
+    if (current_bytes > peak_bytes) {
+      peak_bytes = current_bytes;
     }
   }
   
-  void reset() {
-    current_usage = 0;
-    peak_usage = 0;
-    allocation_count = 0;
-    free_count = 0;
-    leak_count = 0;
-    last_update = std::chrono::steady_clock::now();
-  }
-  
-  bool has_leaks() const {
-    return allocation_count > free_count;
-  }
-  
-  size_t estimated_leak_size() const {
-    if (allocation_count > free_count) {
-      return (allocation_count - free_count) * (current_usage / (allocation_count > 0 ? allocation_count : 1));
-    }
-    return 0;
-  }
-};
-
-/**
- * @brief Memory usage trend analysis
- */
-struct MemoryTrend {
-  std::vector<size_t> usage_samples;
-  std::vector<std::chrono::steady_clock::time_point> sample_times;
-  double growth_rate_per_minute;
-  size_t predicted_peak_in_minutes;
-  bool is_stable;
-  bool is_growing;
-  
-  MemoryTrend() : growth_rate_per_minute(0.0), 
-                 predicted_peak_in_minutes(0),
-                 is_stable(false), is_growing(false) {}
-  
-  void clear() {
-    usage_samples.clear();
-    sample_times.clear();
-    growth_rate_per_minute = 0.0;
-    predicted_peak_in_minutes = 0;
-    is_stable = false;
-    is_growing = false;
-  }
-  
-  void add_sample(size_t usage) {
-    usage_samples.push_back(usage);
-    sample_times.push_back(std::chrono::steady_clock::now());
-    
-    // Keep only last 100 samples
-    if (usage_samples.size() > 100) {
-      usage_samples.erase(usage_samples.begin());
-      sample_times.erase(sample_times.begin());
-    }
-    
-    update_trend_analysis();
-  }
-  
-  void update_trend_analysis() {
-    if (usage_samples.size() < 2) {
-      growth_rate_per_minute = 0.0;
-      predicted_peak_in_minutes = 0;
-      is_stable = true;
-      is_growing = false;
-      return;
-    }
-    
-    // Calculate growth rate
-    size_t num_samples = usage_samples.size();
-    size_t first = usage_samples[0];
-    size_t last = usage_samples[num_samples - 1];
-    
-    auto time_diff = std::chrono::duration_cast<std::chrono::minutes>(
-      sample_times[num_samples - 1] - sample_times[0]).count();
-    
-    if (time_diff > 0) {
-      growth_rate_per_minute = static_cast<double>(last - first) / time_diff;
+  void update_deallocation(size_t bytes) {
+    if (current_bytes >= bytes) {
+      current_bytes -= bytes;
     } else {
-      growth_rate_per_minute = 0.0;
+      current_bytes = 0;
     }
-    
-    // Determine if stable or growing
-    is_growing = growth_rate_per_minute > 100.0;  // > 100 bytes/minute
-    is_stable = std::abs(growth_rate_per_minute) < 10.0;  // < 10 bytes/minute
-    
-    // Predict when we might hit a limit (assuming 2GB limit)
-    if (is_growing && growth_rate_per_minute > 0.0) {
-      size_t limit = 2 * 1024 * 1024 * 1024;  // 2GB
-      if (last < limit) {
-        predicted_peak_in_minutes = static_cast<size_t>((limit - last) / growth_rate_per_minute);
-      } else {
-        predicted_peak_in_minutes = 0;
-      }
-    } else {
-      predicted_peak_in_minutes = 0;
+    deallocation_count++;
+    last_deallocation = std::chrono::steady_clock::now();
+  }
+};
+
+/**
+ * @brief Memory limit configuration
+ */
+struct MemoryLimit {
+  size_t warning_threshold_bytes = 0;
+  size_t critical_threshold_bytes = 0;
+  size_t hard_limit_bytes = 0;
+  
+  bool is_warning(size_t bytes) const {
+    return warning_threshold_bytes > 0 && bytes >= warning_threshold_bytes;
+  }
+  
+  bool is_critical(size_t bytes) const {
+    return critical_threshold_bytes > 0 && bytes >= critical_threshold_bytes;
+  }
+  
+  bool is_exceeded(size_t bytes) const {
+    return hard_limit_bytes > 0 && bytes >= hard_limit_bytes;
+  }
+  
+  double get_percentage(size_t bytes) const {
+    if (hard_limit_bytes == 0) return 100.0;
+    return (static_cast<double>(bytes) / hard_limit_bytes) * 100.0;
+  }
+};
+
+/**
+ * @brief Memory alert
+ */
+struct MemoryAlert {
+  enum class Severity {
+    INFO,
+    WARNING,
+    CRITICAL,
+    FATAL
+  };
+  
+  Severity severity;
+  std::string component;
+  std::string message;
+  size_t current_bytes;
+  size_t threshold_bytes;
+  std::chrono::steady_clock::time_point timestamp;
+  
+  std::string severity_string() const {
+    switch (severity) {
+      case Severity::INFO: return "INFO";
+      case Severity::WARNING: return "WARNING";
+      case Severity::CRITICAL: return "CRITICAL";
+      case Severity::FATAL: return "FATAL";
+      default: return "UNKNOWN";
     }
   }
 };
 
 /**
- * @brief Memory alert configuration
+ * @brief Memory cleanup callback
  */
-struct MemoryAlertConfig {
-  size_t warning_threshold_bytes;
-  size_t critical_threshold_bytes;
-  size_t check_interval_ms;
-  size_t consecutive_checks_for_alert;
-  std::function<void(const std::string&, size_t)> warning_callback;
-  std::function<void(const std::string&, size_t)> critical_callback;
-  
-  MemoryAlertConfig() : 
-    warning_threshold_bytes(1024 * 1024 * 1024),  // 1 GB
-    critical_threshold_bytes(1536 * 1024 * 1024), // 1.5 GB
-    check_interval_ms(5000),                      // 5 seconds
-    consecutive_checks_for_alert(3) {}
-};
+using CleanupCallback = std::function<void(size_t target_bytes)>;
 
 /**
- * @brief Memory alert state
- */
-struct MemoryAlertState {
-  bool warning_active;
-  bool critical_active;
-  size_t consecutive_warning_checks;
-  size_t consecutive_critical_checks;
-  std::chrono::steady_clock::time_point last_warning_time;
-  std::chrono::steady_clock::time_point last_critical_time;
-  
-  MemoryAlertState() : warning_active(false), critical_active(false),
-                      consecutive_warning_checks(0), consecutive_critical_checks(0) {}
-  
-  void reset() {
-    warning_active = false;
-    critical_active = false;
-    consecutive_warning_checks = 0;
-    consecutive_critical_checks = 0;
-  }
-};
-
-/**
- * @brief System-wide memory monitor for voice cloning components
+ * @brief Real-time memory usage monitor
+ * 
+ * Tracks memory usage by component, enforces limits,
+ * and triggers cleanup when needed.
  */
 class MemoryMonitor {
 public:
   /**
-   * @brief Get singleton instance
-   * @return Reference to singleton instance
+   * @brief Configuration for memory monitor
    */
-  static MemoryMonitor& get_instance();
+  struct Config {
+    // Global limits
+    MemoryLimit global_limit;
+    
+    // Component-specific limits
+    std::unordered_map<std::string, MemoryLimit> component_limits;
+    
+    // Alerting
+    bool enable_alerts = true;
+    size_t alert_cooldown_ms = 1000;  // Minimum time between alerts
+    
+    // Cleanup
+    bool enable_auto_cleanup = true;
+    size_t cleanup_threshold_percent = 80;  // Cleanup when >80% of limit
+    size_t max_cleanup_attempts = 3;
+    
+    // Reporting
+    bool enable_periodic_reports = false;
+    size_t report_interval_ms = 60000;  // 1 minute
+    
+    // Performance tracking
+    bool track_allocation_patterns = true;
+    size_t pattern_window_size = 1000;  // Track last 1000 allocations
+  };
   
   /**
-   * @brief Initialize memory monitor
-   * @param config Alert configuration
-   * @return true if initialized successfully, false otherwise
+   * @brief Constructor
+   * @param config Monitor configuration
    */
-  bool initialize(const MemoryAlertConfig& config = MemoryAlertConfig());
+  explicit MemoryMonitor(const Config& config = Config());
   
   /**
-   * @brief Register component for memory monitoring
-   * @param component_name Name of component
-   * @return true if registered successfully, false otherwise
+   * @brief Destructor
    */
-  bool register_component(const std::string& component_name);
+  ~MemoryMonitor();
   
   /**
-   * @brief Unregister component from memory monitoring
-   * @param component_name Name of component
-   * @return true if unregistered successfully, false otherwise
+   * @brief Initialize the memory monitor
+   * @return true if initialization succeeded, false otherwise
    */
-  bool unregister_component(const std::string& component_name);
+  bool initialize();
   
   /**
-   * @brief Update memory usage for component
-   * @param component_name Name of component
-   * @param delta_bytes Change in memory usage (positive for allocation, negative for free)
-   * @return true if updated successfully, false otherwise
+   * @brief Track memory allocation for a component
+   * @param component Component name
+   * @param bytes Number of bytes allocated
+   * @param source Optional source information (file:line)
+   * @return true if allocation is allowed, false if limit exceeded
    */
-  bool update_component_usage(const std::string& component_name, ssize_t delta_bytes);
+  bool track_allocation(const std::string& component, size_t bytes, 
+                       const std::string& source = "");
   
   /**
-   * @brief Set component usage directly
-   * @param component_name Name of component
-   * @param usage_bytes Current memory usage
-   * @return true if set successfully, false otherwise
+   * @brief Track memory deallocation for a component
+   * @param component Component name
+   * @param bytes Number of bytes deallocated
    */
-  bool set_component_usage(const std::string& component_name, size_t usage_bytes);
+  void track_deallocation(const std::string& component, size_t bytes);
   
   /**
-   * @brief Get component memory statistics
-   * @param component_name Name of component
-   * @return Component memory stats
+   * @brief Register a component for monitoring
+   * @param component Component name
+   * @param limit Optional component-specific limit
+   * @return true if registration succeeded, false otherwise
    */
-  ComponentMemoryStats get_component_stats(const std::string& component_name) const;
+  bool register_component(const std::string& component, 
+                         const MemoryLimit& limit = MemoryLimit());
+  
+  /**
+   * @brief Unregister a component from monitoring
+   * @param component Component name
+   */
+  void unregister_component(const std::string& component);
+  
+  /**
+   * @brief Get component statistics
+   * @param component Component name
+   * @return Component statistics, or empty stats if not found
+   */
+  ComponentStats get_component_stats(const std::string& component) const;
   
   /**
    * @brief Get all component statistics
-   * @return Vector of component stats
+   * @return Map of component name to statistics
    */
-  std::vector<ComponentMemoryStats> get_all_component_stats() const;
+  std::unordered_map<std::string, ComponentStats> get_all_stats() const;
   
   /**
-   * @brief Get total memory usage across all components
-   * @return Total memory usage in bytes
+   * @brief Get global memory usage
+   * @return Total memory usage across all components
    */
-  size_t get_total_memory_usage() const;
+  size_t get_global_usage() const;
   
   /**
-   * @brief Get peak memory usage across all components
-   * @return Peak memory usage in bytes
+   * @brief Check if memory usage is within limits
+   * @return true if within all limits, false otherwise
    */
-  size_t get_peak_memory_usage() const;
+  bool is_within_limits() const;
   
   /**
-   * @brief Get memory trend analysis
-   * @return Memory trend analysis
+   * @brief Check if specific component is within limits
+   * @param component Component name
+   * @return true if within limits, false otherwise
    */
-  MemoryTrend get_memory_trend() const;
+  bool is_component_within_limits(const std::string& component) const;
   
   /**
-   * @brief Check for memory leaks
-   * @return Vector of components with suspected leaks
+   * @brief Generate memory usage report
+   * @param detailed Include detailed component information
+   * @return Formatted report string
    */
-  std::vector<std::string> check_for_leaks() const;
+  std::string generate_report(bool detailed = true) const;
   
   /**
-   * @brief Perform periodic memory check
-   * @return true if check performed, false otherwise
+   * @brief Generate memory alert report
+   * @return Vector of current alerts
    */
-  bool perform_periodic_check();
-  
-  /**
-   * @brief Get alert configuration
-   * @return Current alert configuration
-   */
-  MemoryAlertConfig get_alert_config() const;
-  
-  /**
-   * @brief Update alert configuration
-   * @param config New configuration
-   * @return true if updated successfully, false otherwise
-   */
-  bool update_alert_config(const MemoryAlertConfig& config);
-  
-  /**
-   * @brief Check if any alerts are active
-   * @return true if alerts active, false otherwise
-   */
-  bool has_active_alerts() const;
-  
-  /**
-   * @brief Get active alerts
-   * @return Vector of alert messages
-   */
-  std::vector<std::string> get_active_alerts() const;
+  std::vector<MemoryAlert> get_alerts() const;
   
   /**
    * @brief Clear all alerts
@@ -301,25 +252,27 @@ public:
   void clear_alerts();
   
   /**
-   * @brief Generate memory usage report
-   * @param detailed Include detailed component info
-   * @return Report string
+   * @brief Register cleanup callback
+   * @param component Component name
+   * @param callback Cleanup callback function
+   * @return true if registration succeeded, false otherwise
    */
-  std::string generate_report(bool detailed = false) const;
+  bool register_cleanup_callback(const std::string& component,
+                                CleanupCallback callback);
   
   /**
-   * @brief Save memory usage history to file
-   * @param filepath Path to save file
-   * @return true if saved successfully, false otherwise
+   * @brief Trigger manual cleanup for a component
+   * @param component Component name
+   * @param target_bytes Target memory reduction in bytes
+   * @return Actual bytes freed
    */
-  bool save_history_to_file(const std::string& filepath) const;
+  size_t trigger_cleanup(const std::string& component, size_t target_bytes);
   
   /**
-   * @brief Load memory usage history from file
-   * @param filepath Path to load file from
-   * @return true if loaded successfully, false otherwise
+   * @brief Check and trigger automatic cleanup if needed
+   * @return true if cleanup was triggered, false otherwise
    */
-  bool load_history_from_file(const std::string& filepath);
+  bool check_and_cleanup();
   
   /**
    * @brief Reset all statistics
@@ -327,181 +280,163 @@ public:
   void reset_statistics();
   
   /**
-   * @brief Get system memory info (platform-specific)
-   * @param total_memory Output: total system memory in bytes
-   * @param free_memory Output: free system memory in bytes
-   * @param process_memory Output: process memory usage in bytes
-   * @return true if info retrieved successfully, false otherwise
+   * @brief Get monitor configuration
+   * @return Current configuration
    */
-  static bool get_system_memory_info(size_t& total_memory, 
-                                     size_t& free_memory,
-                                     size_t& process_memory);
+  const Config& get_config() const { return config_; }
   
   /**
-   * @brief Get GPU memory info (if available)
-   * @param total_memory Output: total GPU memory in bytes
-   * @param free_memory Output: free GPU memory in bytes
-   * @param used_memory Output: used GPU memory in bytes
-   * @return true if GPU info retrieved successfully, false otherwise
+   * @brief Update monitor configuration
+   * @param new_config New configuration
+   * @return true if configuration updated successfully, false otherwise
    */
-  static bool get_gpu_memory_info(size_t& total_memory,
-                                  size_t& free_memory,
-                                  size_t& used_memory);
+  bool update_config(const Config& new_config);
   
   /**
-   * @brief Check if system memory is low
-   * @param threshold_percent Threshold percentage (0-100)
-   * @return true if memory is low, false otherwise
+   * @brief Get peak memory usage
+   * @return Peak memory usage in bytes
    */
-  static bool is_system_memory_low(float threshold_percent = 10.0f);
-  
-  /**
-   * @brief Check if GPU memory is low
-   * @param threshold_percent Threshold percentage (0-100)
-   * @return true if GPU memory is low, false otherwise
-   */
-  static bool is_gpu_memory_low(float threshold_percent = 10.0f);
-  
-  /**
-   * @brief Force garbage collection (calls system malloc_trim if available)
-   * @return Amount of memory reclaimed in bytes
-   */
-  static size_t force_garbage_collection();
+  size_t get_peak_usage() const { return peak_usage_; }
   
 private:
-  MemoryMonitor();
-  ~MemoryMonitor();
+  Config config_;
+  bool initialized_ = false;
   
-  // Disable copying
-  MemoryMonitor(const MemoryMonitor&) = delete;
-  MemoryMonitor& operator=(const MemoryMonitor&) = delete;
+  // Component tracking
+  std::unordered_map<std::string, ComponentStats> component_stats_;
+  std::unordered_map<std::string, MemoryLimit> component_limits_;
+  std::unordered_map<std::string, CleanupCallback> cleanup_callbacks_;
   
+  // Global tracking
+  size_t global_usage_ = 0;
+  size_t peak_usage_ = 0;
+  size_t total_allocations_ = 0;
+  size_t total_deallocations_ = 0;
+  
+  // Alert tracking
+  std::vector<MemoryAlert> alerts_;
+  std::unordered_map<std::string, std::chrono::steady_clock::time_point> last_alert_time_;
+  
+  // Thread safety
   mutable std::mutex mutex_;
-  std::unordered_map<std::string, ComponentMemoryStats> component_stats_;
-  MemoryTrend global_trend_;
-  MemoryAlertConfig alert_config_;
-  MemoryAlertState alert_state_;
-  std::chrono::steady_clock::time_point last_check_time_;
-  std::atomic<bool> initialized_;
-  std::atomic<bool> monitoring_active_;
   
-  // History for reporting
-  struct HistoryEntry {
-    std::chrono::steady_clock::time_point timestamp;
-    size_t total_usage;
-    std::unordered_map<std::string, size_t> component_usages;
-  };
+  // Private methods
+  bool check_limits(const std::string& component, size_t bytes);
+  void add_alert(MemoryAlert::Severity severity, const std::string& component,
+                const std::string& message, size_t bytes, size_t threshold);
+  void check_for_alerts(const std::string& component, size_t bytes);
+  void update_global_stats();
+  void generate_periodic_report();
   
-  std::vector<HistoryEntry> history_;
-  
-  // Helper methods
-  void update_global_trend();
-  void check_alerts();
-  void trigger_warning_alert(size_t current_usage);
-  void trigger_critical_alert(size_t current_usage);
-  void clear_warning_alert();
-  void clear_critical_alert();
-  void add_history_entry();
-  
-  // Get logger instance
-  logging::Logger& get_logger() const {
-    static logging::Logger& logger = logging::Logger::get_instance("memory_monitor");
-    return logger;
-  }
+  // Cleanup management
+  size_t perform_cleanup(const std::string& component, size_t target_bytes);
+  void log_monitor_operation(const std::string& operation, 
+                           const std::string& component, size_t bytes);
 };
 
 /**
- * @brief RAII wrapper for tracking memory allocations
+ * @brief Singleton memory monitor instance
  */
-class MemoryTracker {
+class GlobalMemoryMonitor {
 public:
   /**
-   * @brief Constructor
-   * @param component_name Name of component being tracked
-   * @param allocation_size Size of allocation in bytes
+   * @brief Get singleton instance
+   * @return Reference to singleton instance
    */
-  MemoryTracker(const std::string& component_name, size_t allocation_size);
+  static GlobalMemoryMonitor& get_instance();
   
   /**
-   * @brief Destructor (automatically frees tracked memory)
+   * @brief Initialize global monitor
+   * @param config Monitor configuration
+   * @return true if initialization succeeded, false otherwise
    */
-  ~MemoryTracker();
+  bool initialize(const MemoryMonitor::Config& config = MemoryMonitor::Config());
   
   /**
-   * @brief Update allocation size
-   * @param new_size New allocation size in bytes
+   * @brief Get the memory monitor
+   * @return Pointer to memory monitor, or nullptr if not initialized
    */
-  void update_size(size_t new_size);
+  MemoryMonitor* get_monitor();
   
   /**
-   * @brief Get tracked component name
-   * @return Component name
+   * @brief Check if monitor is initialized
+   * @return true if initialized, false otherwise
    */
-  std::string get_component_name() const;
+  bool is_initialized() const { return monitor_ != nullptr; }
   
   /**
-   * @brief Get current allocation size
-   * @return Allocation size in bytes
+   * @brief Shutdown the global monitor
    */
-  size_t get_allocation_size() const;
+  void shutdown();
   
   /**
-   * @brief Manually free tracked memory (called automatically by destructor)
+   * @brief Convenience method for tracking allocations
    */
-  void free();
+  static bool track_allocation(const std::string& component, size_t bytes,
+                              const std::string& source = "") {
+    auto& instance = get_instance();
+    if (auto monitor = instance.get_monitor()) {
+      return monitor->track_allocation(component, bytes, source);
+    }
+    return true;  // Allow if monitor not initialized
+  }
   
-  // Disable copying
-  MemoryTracker(const MemoryTracker&) = delete;
-  MemoryTracker& operator=(const MemoryTracker&) = delete;
-  
-  // Allow moving
-  MemoryTracker(MemoryTracker&& other) noexcept;
-  MemoryTracker& operator=(MemoryTracker&& other) noexcept;
+  /**
+   * @brief Convenience method for tracking deallocations
+   */
+  static void track_deallocation(const std::string& component, size_t bytes) {
+    auto& instance = get_instance();
+    if (auto monitor = instance.get_monitor()) {
+      monitor->track_deallocation(component, bytes);
+    }
+  }
   
 private:
-  std::string component_name_;
-  size_t allocation_size_;
-  bool freed_;
+  GlobalMemoryMonitor() = default;
+  ~GlobalMemoryMonitor();
   
-  // Get memory monitor instance
-  static MemoryMonitor& get_memory_monitor() {
-    return MemoryMonitor::get_instance();
-  }
+  // Prevent copying
+  GlobalMemoryMonitor(const GlobalMemoryMonitor&) = delete;
+  GlobalMemoryMonitor& operator=(const GlobalMemoryMonitor&) = delete;
+  
+  std::unique_ptr<MemoryMonitor> monitor_;
 };
 
 /**
- * @brief Scope-based memory tracking
+ * @brief RAII helper for tracking memory allocations
  */
 class ScopedMemoryTracker {
 public:
   /**
-   * @brief Constructor
-   * @param component_name Name of component
-   * @param allocation_size Size of allocation in bytes
+   * @brief Constructor - tracks allocation
+   * @param component Component name
+   * @param bytes Number of bytes allocated
+   * @param source Optional source information
    */
-  ScopedMemoryTracker(const std::string& component_name, size_t allocation_size);
+  ScopedMemoryTracker(const std::string& component, size_t bytes,
+                     const std::string& source = "")
+    : component_(component), bytes_(bytes) {
+    GlobalMemoryMonitor::track_allocation(component, bytes, source);
+  }
   
   /**
-   * @brief Destructor (automatically tracks free)
+   * @brief Destructor - tracks deallocation
    */
-  ~ScopedMemoryTracker();
+  ~ScopedMemoryTracker() {
+    GlobalMemoryMonitor::track_deallocation(component_, bytes_);
+  }
   
-  /**
-   * @brief Update allocation size
-   * @param new_size New allocation size in bytes
-   */
-  void update_size(size_t new_size);
-  
-  // Disable copying
+  // Prevent copying
   ScopedMemoryTracker(const ScopedMemoryTracker&) = delete;
   ScopedMemoryTracker& operator=(const ScopedMemoryTracker&) = delete;
   
   // Allow moving
-  ScopedMemoryTracker(ScopedMemoryTracker&& other) noexcept;
-  ScopedMemoryTracker& operator=(ScopedMemoryTracker&& other) noexcept;
+  ScopedMemoryTracker(ScopedMemoryTracker&&) = default;
+  ScopedMemoryTracker& operator=(ScopedMemoryTracker&&) = default;
   
 private:
-  std::unique_ptr<MemoryTracker> tracker_;
+  std::string component_;
+  size_t bytes_;
 };
 
 } // namespace memory
