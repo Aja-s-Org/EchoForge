@@ -126,9 +126,26 @@ jobs:
         run: |
           npm ci
           npm run build
-          npm run release
-          cat package.json | jq -r '.version'
-          echo "semver=$(cat package.json | jq -r '.version')" >> $GITHUB_OUTPUT
+
+          # Until the very first release tag exists there is no ref for nx to
+          # diff against, so the first run has to be told it is the first one.
+          FIRST_RELEASE=""
+          if [ -z "$(git tag --list)" ]; then
+            echo "No release tags found, running as first release"
+            FIRST_RELEASE="--first-release"
+          fi
+
+          # Alpha track: conventional commits decide the bump, --preid turns it
+          # into its prerelease equivalent (patch -> prepatch -> x.y.z-alpha.0),
+          # and every subsequent run stays on the track (-alpha.0 -> -alpha.1)
+          # until someone graduates it with an explicit specifier.
+          npm run release:alpha -- $FIRST_RELEASE
+
+          # The root package.json is not part of the release group, so read the
+          # version back off the tag nx just created.
+          RELEASED_VERSION="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+          echo "Released: ${RELEASED_VERSION:-<no release created>}"
+          echo "semver=${RELEASED_VERSION#v}" >> $GITHUB_OUTPUT
       - name: get latest git ref
         id: git-ref
         run: |

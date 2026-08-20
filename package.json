@@ -32,6 +32,8 @@
     "release:dry-run": "nx release --dry-run",
     "changelog": "nx release changelog --git-commit --git-push",
     "release": "nx release",
+    "release:alpha": "nx release --preid=alpha --skip-publish",
+    "release:alpha:dry-run": "nx release --preid=alpha --skip-publish --dry-run",
     "diagram": "nx run-many --target=diagram"
   },
   "license": "ISC",
