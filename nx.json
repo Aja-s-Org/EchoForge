@@ -63,6 +63,7 @@
       }
     },
     "projects": ["apps/*", "packages/*"],
+    "releaseTagPatternStrictPreid": true,
     "version": {
       "conventionalCommits": true,
       "fallbackCurrentVersionResolver": "disk"
