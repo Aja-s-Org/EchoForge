@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: ${{ inputs.ref }}
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .github/workflows/.node-version
           cache: 'npm'
@@ -50,7 +50,7 @@ jobs:
       - name: Checkout main branch for nx
         run: |
           git fetch --no-tags --prune --depth=1 origin main
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .github/workflows/.node-version
           cache: 'npm'
@@ -95,7 +95,7 @@ jobs:
           ref: ${{ inputs.ref }}
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .github/workflows/.node-version
           cache: 'npm'
