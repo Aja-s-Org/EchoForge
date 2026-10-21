@@ -106,7 +106,7 @@ jobs:
           key: cache-nx-${{ hashFiles('package-lock.json') }}-semver-release-${{ github.sha }}
           restore-keys: |
             cache-nx-${{ hashFiles('package-lock.json') }}-semver-release-
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@v3
         id: app-token
         with:
           app-id: ${{ secrets.OPERATIONS_CLIENT_ID }}
