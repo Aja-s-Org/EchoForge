@@ -55,7 +55,7 @@ jobs:
           node-version-file: .github/workflows/.node-version
           cache: 'npm'
       - name: cache Nx
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .nx/cache
           key: cache-nx-${{ hashFiles('package-lock.json') }}-build-test-${{github.event.pull_request.number}}-${{ github.sha }}
@@ -100,7 +100,7 @@ jobs:
           node-version-file: .github/workflows/.node-version
           cache: 'npm'
       - name: Cache Nx
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .nx/cache
           key: cache-nx-${{ hashFiles('package-lock.json') }}-semver-release-${{ github.sha }}
