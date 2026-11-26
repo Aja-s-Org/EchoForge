@@ -28,20 +28,14 @@ jobs:
     if: ${{ github.actor == 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v7
-      - name: approve Dependabot PR
+      # Runs only after build-and-test passes, so merge directly.
+      # No approval step: the main ruleset requires 0 reviews.
+      - name: Squash-merge Dependabot PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr review --approve ${{ github.event.pull_request.html_url }} --body "Auto approved by CI"
-      - name: Enable auto-merge for Dependabot PRs
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr merge --auto --squash ${{ github.event.pull_request.html_url }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge --squash "$PR_URL"
   lint-commits:
     if: ${{ github.actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
