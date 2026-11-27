@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { randomBytes } from 'crypto';
 
 export interface DatabaseVoiceCloningJob {
   id: string;
@@ -275,6 +276,8 @@ export class DatabaseService {
   }
 
   private generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substring(2);
+    // 32 hex characters, the format the job endpoints validate; unguessable,
+    // since a job ID is all that is needed to fetch its result.
+    return randomBytes(16).toString('hex');
   }
 }
