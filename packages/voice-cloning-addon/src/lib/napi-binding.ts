@@ -28,6 +28,17 @@ interface NativeAddon {
   };
 }
 
+interface NativeCloneResult {
+  success: boolean;
+  similarityScore: number;
+  processingTimeMs: number;
+  errorMessage: string;
+  audio?: AudioData;
+  embedding?: { embedding: number[]; dimension: number };
+}
+
+type NativeCloneCallback = (error: Error | null, result: NativeCloneResult) => void;
+
 // Native VoiceCloner instance interface
 interface VoiceClonerInstance {
   initialize(): boolean;
@@ -45,29 +56,27 @@ interface VoiceClonerInstance {
     language?: string,
     speed?: number
   ): AudioData;
+  // Argument order matches src/cpp/voice_cloner.cc: a file path is followed by
+  // the text, a sample buffer by its sample rate and channel count first.
+  cloneVoice(filePath: string, text: string, language?: string, speed?: number): NativeCloneResult;
   cloneVoice(
-    audio: Buffer | string | { samples: Buffer; sampleRate: number; channels: number },
+    samples: Buffer,
+    sampleRate: number,
+    channels: number,
     text: string,
     language?: string,
-    speed?: number,
-    sampleRate?: number,
-    channels?: number
-  ): {
-    success: boolean;
-    similarityScore: number;
-    processingTimeMs: number;
-    errorMessage: string;
-    audio?: AudioData;
-    embedding?: { embedding: number[]; dimension: number };
-  };
+    speed?: number
+  ): NativeCloneResult;
+  // Same arguments as cloneVoice, with the callback always last.
+  cloneVoiceAsync(filePath: string, text: string, language: string | undefined, speed: number | undefined, callback: NativeCloneCallback): void;
   cloneVoiceAsync(
-    audio: Buffer | string | { samples: Buffer; sampleRate: number; channels: number },
+    samples: Buffer,
+    sampleRate: number,
+    channels: number,
     text: string,
-    callback: (error: Error | null, result: any) => void,
-    language?: string,
-    speed?: number,
-    sampleRate?: number,
-    channels?: number
+    language: string | undefined,
+    speed: number | undefined,
+    callback: NativeCloneCallback
   ): void;
   getMemoryUsage(): number;
   clearCache(): void;
@@ -241,7 +250,7 @@ export class NativeVoiceCloner implements VoiceCloner {
       // Buffer - need sample rate and channels from config
       const sampleRate = this.config?.targetSampleRate || 22050;
       const channels = this.config?.targetChannels || 1;
-      result = this.nativeInstance.cloneVoice(audioData, text, language, speed, sampleRate, channels);
+      result = this.nativeInstance.cloneVoice(audioData, sampleRate, channels, text, language, speed);
     } else {
       throw new Error('Invalid audio data type. Expected Buffer or string file path.');
     }
@@ -306,12 +315,12 @@ export class NativeVoiceCloner implements VoiceCloner {
 
       if (typeof audioData === 'string') {
         // File path
-        this.nativeInstance.cloneVoiceAsync(audioData, text, callback, language, speed);
+        this.nativeInstance.cloneVoiceAsync(audioData, text, language, speed, callback);
       } else if (Buffer.isBuffer(audioData)) {
         // Buffer - need sample rate and channels from config
         const sampleRate = this.config?.targetSampleRate || 22050;
         const channels = this.config?.targetChannels || 1;
-        this.nativeInstance.cloneVoiceAsync(audioData, text, callback, language, speed, sampleRate, channels);
+        this.nativeInstance.cloneVoiceAsync(audioData, sampleRate, channels, text, language, speed, callback);
       } else {
         reject(new Error('Invalid audio data type. Expected Buffer or string file path.'));
       }
