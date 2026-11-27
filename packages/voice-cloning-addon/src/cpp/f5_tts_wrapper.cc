@@ -5,9 +5,14 @@
 #include <chrono>
 #include <stdexcept>
 #include <cstring>
+#include <cmath>
 // #include <json/json.h>  // Temporarily disabled for core test
 
 namespace f5_tts {
+
+namespace {
+constexpr float kPi = 3.14159265358979f;
+}  // namespace
 
 // Get logger instance
 logging::Logger& get_f5tts_logger() {
@@ -128,7 +133,7 @@ public:
       float frequency = 440.0f;  // A4 note
       for (int i = 0; i < num_samples; ++i) {
         float t = static_cast<float>(i) / audio.sample_rate;
-        audio.samples[i] = 0.1f * sin(2.0f * M_PI * frequency * t);
+        audio.samples[i] = 0.1f * std::sin(2.0f * kPi * frequency * t);
       }
       
       auto end_time = std::chrono::high_resolution_clock::now();
