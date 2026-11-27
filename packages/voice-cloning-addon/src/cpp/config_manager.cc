@@ -211,8 +211,8 @@ std::vector<std::string> ConfigManager::get_keys(const std::string& section) con
 }
 
 void ConfigManager::clear() {
-  std::lock_guard<std::mutex> lock(config_mutex_);
-  config_.clear();
+  // load_defaults() clears the config and takes the (non-recursive) lock
+  // itself, so locking here as well would deadlock.
   load_defaults();
 }
 
