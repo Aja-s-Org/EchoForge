@@ -372,7 +372,7 @@ export class NativeAudioProcessor implements AudioProcessor {
     return mono;
   }
 
-  normalize(audioData: AudioData, targetLevel: number = 0.9): AudioData {
+  normalize(audioData: AudioData, targetLevel = 0.9): AudioData {
     // TODO: Implement in C++ or TypeScript
     // Find peak amplitude
     let maxAmplitude = 0;

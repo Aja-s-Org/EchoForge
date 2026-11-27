@@ -24,7 +24,7 @@ export class VoiceCloningClient {
   private serviceUrl: string;
   private useHttp: boolean;
 
-  constructor(serviceUrl: string = 'http://localhost:8080') {
+  constructor(serviceUrl = 'http://localhost:8080') {
     this.serviceUrl = serviceUrl;
     this.useHttp = serviceUrl.startsWith('http');
   }
@@ -79,7 +79,7 @@ export class VoiceCloningClient {
   async synthesizeSpeech(
     voiceEmbedding: number[],
     text: string,
-    language: string = 'en'
+    language = 'en'
   ): Promise<SynthesizedSpeech | VoiceCloningError> {
     if (this.useHttp) {
       const response = await fetch(`${this.serviceUrl}/synthesize`, {
