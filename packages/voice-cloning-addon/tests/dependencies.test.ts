@@ -3,7 +3,6 @@
  * This test should pass after completing Task 2: Install Dependencies.
  */
 
-import { execSync } from 'child_process';
 import { existsSync } from 'fs';
 import { join } from 'path';
 
@@ -63,24 +62,5 @@ describe('Dependency Verification', () => {
   test('Installation documentation exists', () => {
     expect(existsSync(join(projectRoot, 'INSTALL.md'))).toBe(true);
     expect(existsSync(join(projectRoot, 'scripts', 'setup-macos.sh'))).toBe(true);
-  });
-
-  // This test is disabled by default because it requires system dependencies
-  // Uncomment and run manually after installing system dependencies
-  test.skip('System dependencies can be checked (manual test)', () => {
-    // This test would check for system dependencies like:
-    // - libsndfile
-    // - portaudio
-    // - CMake
-    // - node-gyp
-    // But it's skipped because it requires actual system installation
-    
-    // Example of what could be checked:
-    // try {
-    //   execSync('cmake --version', { stdio: 'pipe' });
-    //   execSync('node-gyp --version', { stdio: 'pipe' });
-    // } catch (error) {
-    //   console.warn('System dependencies not fully installed. See INSTALL.md');
-    // }
   });
 });
