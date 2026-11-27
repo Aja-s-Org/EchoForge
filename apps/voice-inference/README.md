@@ -47,6 +47,12 @@ huggingface/               Hugging Face cache with openai/whisper-large-v3-turbo
 | `MAX_TEXT_CHARS` | `5000` | Longest accepted text. |
 | `PORT` | `8080` | HTTP port (Cloud Run sets this). |
 
+## F5-TTS version
+
+`f5-tts.json` pins the F5-TTS release by tag, commit SHA and archive SHA-256. The cached `fetch-f5-tts` and `build-f5-tts` Nx targets download that commit's source archive from GitHub (rejecting it if the checksum doesn't match) and build a wheel into `dist/third_party/f5-tts/wheel`, which the Dockerfile installs. To upgrade, change `version` and `commit`, clear `sha256`, run `npx nx run voice-inference:fetch-f5-tts` to print the new archive's checksum, and pin it.
+
+`node apps/voice-inference/scripts/f5-tts.mjs install` builds the wheel and pip-installs it into the current Python environment, for running F5-TTS locally.
+
 ## Development
 
 ```bash

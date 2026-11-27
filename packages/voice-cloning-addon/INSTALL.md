@@ -53,17 +53,14 @@ npm install
 
 ## f5-tts Library
 
-f5-tts is not committed to this repository. `f5-tts.json` pins a release by tag and commit SHA,
-and the `fetch-f5-tts` / `build-f5-tts` Nx targets download that source archive from GitHub and
-build a wheel into `dist/third_party/f5-tts`. Both targets are cached by Nx, and `backend-api`'s
-build and test targets depend on `build-f5-tts`.
+F5-TTS runs in the separate voice inference service (`apps/voice-inference`), which pins the
+release in `apps/voice-inference/f5-tts.json` and builds it with its `fetch-f5-tts` /
+`build-f5-tts` Nx targets. This addon doesn't need it to build or test.
 
 ```bash
 # From the monorepo root
-npx nx run @echoforge/voice-cloning-addon:build-f5-tts
+npx nx run voice-inference:build-f5-tts
 ```
-
-To upgrade, change `version` and `commit` in `f5-tts.json` (and clear or update `sha256`).
 
 ## Building the Addon
 
@@ -174,8 +171,8 @@ python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Build the pinned f5-tts wheel and install it with its dependencies
-# (from packages/voice-cloning-addon)
-npm run setup:python
+# (from the monorepo root)
+node apps/voice-inference/scripts/f5-tts.mjs install
 
 # For GPU support, install the PyTorch build for your CUDA version first
 # See f5-tts README for detailed instructions

@@ -5,11 +5,31 @@
   "projectType": "application",
   "tags": ["type:app", "lang:python"],
   "targets": {
+    "fetch-f5-tts": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["{projectRoot}/f5-tts.json", "{projectRoot}/scripts/f5-tts.mjs"],
+      "outputs": ["{workspaceRoot}/dist/third_party/f5-tts/src"],
+      "options": {
+        "command": "node apps/voice-inference/scripts/f5-tts.mjs fetch"
+      }
+    },
+    "build-f5-tts": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "dependsOn": ["fetch-f5-tts"],
+      "inputs": ["{projectRoot}/f5-tts.json", "{projectRoot}/scripts/f5-tts.mjs", { "env": "PYTHON" }],
+      "outputs": ["{workspaceRoot}/dist/third_party/f5-tts/wheel"],
+      "options": {
+        "command": "node apps/voice-inference/scripts/f5-tts.mjs wheel"
+      }
+    },
     "test-python": {
       "executor": "nx:run-commands",
       "inputs": [
         "{projectRoot}/src/**/*.py",
         "{projectRoot}/tests/**/*",
+        "{projectRoot}/f5-tts.json",
         "{projectRoot}/requirements-test.txt",
         "{projectRoot}/pyproject.toml",
         "{projectRoot}/scripts/test.sh",
@@ -21,7 +41,7 @@
     },
     "docker-build": {
       "executor": "nx:run-commands",
-      "dependsOn": [{ "projects": ["@echoforge/voice-cloning-addon"], "target": "build-f5-tts" }],
+      "dependsOn": ["build-f5-tts"],
       "options": {
         "command": "echo 'Please specify a cloud configuration: -c gcp'"
       },

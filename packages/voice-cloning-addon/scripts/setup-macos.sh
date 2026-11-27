@@ -38,7 +38,7 @@ echo ""
 echo "System dependencies installation complete!"
 echo ""
 echo "Next steps:"
-echo "1. Fetch and build f5-tts: npx nx run @echoforge/voice-cloning-addon:build-f5-tts"
+echo "1. (Only for the voice-inference service) build f5-tts: npx nx run voice-inference:build-f5-tts"
 echo "2. Install Node.js dependencies: npm install"
 echo "3. Build the addon: npm run build:native"
 # Install Python dependencies (if using Python integration)
@@ -57,8 +57,8 @@ if command -v python3 &> /dev/null; then
         echo "Virtual environment activated. Run 'source venv/bin/activate' in future sessions."
     fi
     
-    echo "Note: Python dependencies for f5-tts will be installed when building the addon."
-    echo "Run 'npm run setup:python' to install f5-tts Python package."
+    echo "Note: F5-TTS runs in the voice-inference service (apps/voice-inference)."
+    echo "To install it locally, run from the monorepo root: node apps/voice-inference/scripts/f5-tts.mjs install"
 else
     echo "Python 3 not found. Please install Python 3.10+ from https://www.python.org/"
 fi

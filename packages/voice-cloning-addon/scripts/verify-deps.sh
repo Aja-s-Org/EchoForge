@@ -86,19 +86,15 @@ else
     echo "✗ Python 3 not found"
 fi
 
-# Check the pinned f5-tts release (fetched at build time, not committed)
+# F5-TTS itself runs in the voice-inference service (apps/voice-inference),
+# which pins and builds it; the addon doesn't need it to build or test.
 echo ""
 echo "=== f5-tts ==="
-if [ -f "f5-tts.json" ]; then
-    echo "✓ f5-tts.json pins $(grep '"version"' f5-tts.json | sed 's/.*: *"\(.*\)".*/\1/')"
-else
-    echo "✗ f5-tts.json not found"
-fi
 if [ -f "../../dist/third_party/f5-tts/src/.f5-tts-commit" ]; then
     echo "✓ f5-tts source fetched"
 else
-    echo "⚠ f5-tts source not fetched yet"
-    echo "  Run from monorepo root: npx nx run @echoforge/voice-cloning-addon:build-f5-tts"
+    echo "⚠ f5-tts source not fetched (only needed for the voice-inference service)"
+    echo "  Run from monorepo root: npx nx run voice-inference:build-f5-tts"
 fi
 
 # Check Node.js dependencies
@@ -189,7 +185,7 @@ echo "If all checks pass with ✓, your environment is ready for voice cloning a
 echo ""
 echo "Next steps:"
 echo "1. Install missing dependencies using: ./scripts/setup-macos.sh"
-echo "2. Fetch and build f5-tts: npx nx run @echoforge/voice-cloning-addon:build-f5-tts"
+echo "2. (Only for the voice-inference service) build f5-tts: npx nx run voice-inference:build-f5-tts"
 echo "3. Install Node.js dependencies: npm install"
 echo "4. Build the addon: npm run build:native"
 echo "5. Run tests: npm test"

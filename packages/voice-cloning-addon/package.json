@@ -19,9 +19,6 @@
     "build": "nx build @echoforge/voice-cloning-addon",
     "build:native": "node-gyp rebuild",
     "clean": "rimraf build",
-    "fetch:f5-tts": "nx run @echoforge/voice-cloning-addon:fetch-f5-tts",
-    "build:f5-tts": "nx run @echoforge/voice-cloning-addon:build-f5-tts",
-    "setup:python": "node scripts/f5-tts.mjs install",
     "check:memory": "./scripts/check_memory.sh"
   },
   "gypfile": false

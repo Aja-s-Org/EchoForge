@@ -1,6 +1,6 @@
 # Runtime dependencies of the voice inference service.
 # f5-tts itself (and PyTorch) is installed from the wheel built by
-# `nx run @echoforge/voice-cloning-addon:build-f5-tts`; see the Dockerfile.
+# `nx run voice-inference:build-f5-tts` (pinned in f5-tts.json); see the Dockerfile.
 fastapi>=0.115,<1
 uvicorn>=0.30,<1
 python-multipart>=0.0.9
