@@ -76,7 +76,7 @@ resource "google_cloud_run_v2_service" "inference" {
 
 # Only the listed service accounts (the backend) may call the service.
 resource "google_cloud_run_v2_service_iam_member" "invokers" {
-  for_each = toset(var.invoker_service_accounts)
+  for_each = var.invoker_service_accounts
 
   location = google_cloud_run_v2_service.inference.location
   project  = google_cloud_run_v2_service.inference.project

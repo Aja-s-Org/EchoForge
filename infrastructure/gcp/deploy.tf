@@ -19,7 +19,7 @@ module "gcp_voice_inference" {
   gcp_region               = var.gcp_region
   docker_image             = var.gcp_voice_inference_image
   service_account_email    = google_service_account.voice_inference_sa.email
-  invoker_service_accounts = [google_service_account.backend_sa.email]
+  invoker_service_accounts = { api = google_service_account.backend_sa.email }
   model_bucket_name        = google_storage_bucket.models.name
   model_prefix             = var.voice_inference_model_prefix
   cpu                      = var.voice_inference_cpu

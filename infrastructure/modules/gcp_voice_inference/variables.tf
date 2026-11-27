@@ -19,8 +19,8 @@ variable "service_account_email" {
 }
 
 variable "invoker_service_accounts" {
-  type        = list(string)
-  description = "Service account emails allowed to call the service"
+  type        = map(string)
+  description = "Service account emails allowed to call the service, keyed by a fixed name (the keys must be known at plan time)"
 }
 
 variable "model_bucket_name" {
