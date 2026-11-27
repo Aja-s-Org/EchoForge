@@ -54,7 +54,7 @@ export class MetricsService {
   
   constructor(private readonly databaseService: DatabaseService) {}
   
-  async collectMetrics(timeWindowMinutes: number = 5): Promise<VoiceCloningMetrics> {
+  async collectMetrics(timeWindowMinutes = 5): Promise<VoiceCloningMetrics> {
     const startTime = Date.now();
     
     try {
@@ -200,7 +200,7 @@ export class MetricsService {
     };
   }
   
-  recordRequest(clientIp: string, success: boolean, rateLimited: boolean = false): void {
+  recordRequest(clientIp: string, success: boolean, rateLimited = false): void {
     const now = new Date();
     const hourKey = `${clientIp}:${now.getHours()}`;
     

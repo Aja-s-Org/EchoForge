@@ -13,7 +13,7 @@ import { VoiceService } from '../services/voice.service';
 import { MetricsService } from '../services/metrics.service';
 import { CleanupService } from '../services/cleanup.service';
 import { DatabaseService } from '../services/database.service';
-import { RequireRoles, RequirePermissions, AuthGuard, UseAuth } from '../middleware/auth.middleware';
+import { RequireRoles, RequirePermissions } from '../middleware/auth.middleware';
 
 export interface MetricsResponse {
   status: 'success';
@@ -38,7 +38,6 @@ export interface JobsListResponse {
 }
 
 @Controller('voice/admin')
-@UseAuth()
 export class VoiceAdminController {
   constructor(
     private readonly voiceService: VoiceService,
@@ -176,8 +175,8 @@ export class VoiceAdminController {
   @RequirePermissions('voice.list')
   async listJobs(
     @Query('status') status?: string,
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '20',
+    @Query('page') page = '1',
+    @Query('limit') limit = '20',
     @Query('fromDate') fromDate?: string,
     @Query('toDate') toDate?: string,
   ): Promise<JobsListResponse> {
@@ -256,7 +255,7 @@ export class VoiceAdminController {
   @RequirePermissions('voice.cleanup')
   async cleanupJob(
     @Param('jobId') jobId: string,
-    @Query('deleteFiles') deleteFiles: string = 'true',
+    @Query('deleteFiles') deleteFiles = 'true',
   ): Promise<CleanupResponse> {
     try {
       const shouldDeleteFiles = deleteFiles.toLowerCase() === 'true';

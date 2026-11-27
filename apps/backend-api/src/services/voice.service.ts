@@ -332,7 +332,7 @@ export class VoiceService {
     }
   }
 
-  async cleanupOldJobs(maxAgeHours: number = 24): Promise<void> {
+  async cleanupOldJobs(maxAgeHours = 24): Promise<void> {
     // Delegate to cleanup service
     await this.cleanupService.cleanupOldJobs(maxAgeHours);
   }
