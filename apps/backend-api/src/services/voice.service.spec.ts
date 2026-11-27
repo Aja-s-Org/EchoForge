@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { VoiceService } from './voice.service';
 import { StorageService } from './storage.service';
 
-// Mock core-engine
-vi.mock('@echoforge/core-engine', () => {
+// Mock voice-cloning-addon
+vi.mock('@echoforge/voice-cloning-addon', () => {
   const mockVoiceCloner = {
     initialize: vi.fn().mockResolvedValue(true),
     cloneVoice: vi.fn().mockResolvedValue(Buffer.from('audio data')),

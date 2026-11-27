@@ -29,7 +29,7 @@ async function runExample() {
     const error = getLoadError();
     console.error(`❌ Native addon not loaded: ${error}`);
     console.log('\nTo build the native addon, run:');
-    console.log('  cd packages/core-engine');
+    console.log('  cd packages/voice-cloning-addon');
     console.log('  npm run build:native');
     return;
   }

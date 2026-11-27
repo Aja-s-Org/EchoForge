@@ -29,10 +29,12 @@
     "test": "nx test @echoforge/voice-cloning-addon",
     "test:coverage": "nx coverage @echoforge/voice-cloning-addon",
     "build": "nx build @echoforge/voice-cloning-addon",
-    "build:cpp": "node-gyp rebuild",
+    "build:native": "node-gyp rebuild",
     "clean": "rimraf build",
     "install": "node-gyp rebuild",
-    "setup:python": "cd third_party/f5-tts && pip install -e .",
-    "setup:python:gpu": "cd third_party/f5-tts && pip install -e .[gpu]"
-  }
+    "setup:python": "cd ../../third_party/f5-tts && pip install -e .",
+    "setup:python:gpu": "cd ../../third_party/f5-tts && pip install -e .[gpu]",
+    "check:memory": "./scripts/check_memory.sh"
+  },
+  "gypfile": true
 }
