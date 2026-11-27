@@ -1,0 +1,47 @@
+{
+  "name": "voice-inference",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/voice-inference/src",
+  "projectType": "application",
+  "tags": ["type:app", "lang:python"],
+  "targets": {
+    "test-python": {
+      "executor": "nx:run-commands",
+      "inputs": [
+        "{projectRoot}/src/**/*.py",
+        "{projectRoot}/tests/**/*",
+        "{projectRoot}/requirements-test.txt",
+        "{projectRoot}/pyproject.toml",
+        "{projectRoot}/scripts/test.sh",
+        { "env": "PYTHON" }
+      ],
+      "options": {
+        "command": "bash apps/voice-inference/scripts/test.sh"
+      }
+    },
+    "docker-build": {
+      "executor": "nx:run-commands",
+      "dependsOn": [{ "projects": ["@echoforge/voice-cloning-addon"], "target": "build-f5-tts" }],
+      "options": {
+        "command": "echo 'Please specify a cloud configuration: -c gcp'"
+      },
+      "configurations": {
+        "gcp": {
+          "command": "docker build --platform linux/amd64 -t us-central1-docker.pkg.dev/echoforge-494507/echoforge-repo/voice-inference:latest -f apps/voice-inference/Dockerfile ."
+        }
+      }
+    },
+    "docker-push": {
+      "executor": "nx:run-commands",
+      "dependsOn": ["docker-build"],
+      "options": {
+        "command": "echo 'Please specify a cloud configuration: -c gcp'"
+      },
+      "configurations": {
+        "gcp": {
+          "command": "docker push us-central1-docker.pkg.dev/echoforge-494507/echoforge-repo/voice-inference:latest"
+        }
+      }
+    }
+  }
+}
