@@ -2,7 +2,7 @@ import { join } from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const FAKE_ADDON = join(__dirname, '../../tests/fixtures/fake-addon.cjs');
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const fake = require(FAKE_ADDON);
 
 type Binding = typeof import('./napi-binding');
