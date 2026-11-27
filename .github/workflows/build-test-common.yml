@@ -42,7 +42,7 @@ jobs:
           npm run lint
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
         with:
@@ -70,6 +70,21 @@ jobs:
       - name: test
         run: |
           npm run test
+      - name: check whether the voice cloning addon is affected
+        id: addon
+        run: |
+          if npx nx show projects --affected --base=origin/main | grep -qx '@echoforge/voice-cloning-addon'; then
+            echo "affected=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: install native and Python test dependencies
+        if: steps.addon.outputs.affected == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends build-essential cmake pkg-config libsndfile1-dev libgtest-dev python3-venv
+      - name: native and Python tests
+        if: steps.addon.outputs.affected == 'true'
+        run: |
+          npx nx run-many --projects=@echoforge/voice-cloning-addon --targets=test-native,test-python
       - name: Comment Code Coverage on PR
         uses: dkhunt27/action-nx-code-coverage@v3
         with:
