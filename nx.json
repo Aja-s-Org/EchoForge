@@ -7,7 +7,8 @@
       "{workspaceRoot}/package.json",
       "{workspaceRoot}/nx.json",
       "{workspaceRoot}/tsconfig.base.json",
-      "{workspaceRoot}/.github/ISSUE_TEMPLATE/**/*"
+      "{workspaceRoot}/.github/ISSUE_TEMPLATE/**/*",
+      "{workspaceRoot}/.github/workflows/**/*"
     ],
     "production": [
       "default",
