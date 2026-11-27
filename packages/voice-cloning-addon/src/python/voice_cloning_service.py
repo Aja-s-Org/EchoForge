@@ -19,7 +19,7 @@ try:
     F5_TTS_AVAILABLE = True
 except ImportError:
     F5_TTS_AVAILABLE = False
-    print("WARNING: f5-tts not installed. Run 'npm run setup:python' to install.", file=sys.stderr)
+    print("WARNING: f5-tts not installed. Run 'node apps/voice-inference/scripts/f5-tts.mjs install' from the repository root.", file=sys.stderr)
 
 class VoiceCloningService:
     """Service that handles voice cloning requests."""

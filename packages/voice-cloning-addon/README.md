@@ -57,19 +57,12 @@ Install via Chocolatey or manually:
    npm install
    ```
 
-2. **Fetch and build f5-tts**: the version is pinned in `f5-tts.json` and downloaded from GitHub
-   at build time into `dist/third_party/f5-tts`. Nx caches the result, and `backend-api`'s build
-   and tests run it automatically.
-   ```bash
-   npx nx run @echoforge/voice-cloning-addon:build-f5-tts
-   ```
-
-3. **Verify installation**:
+2. **Verify installation**:
    ```bash
    ./scripts/verify-deps.sh
    ```
 
-4. **Build the native addon**:
+3. **Build the native addon**:
    ```bash
    npm run build:native
    ```

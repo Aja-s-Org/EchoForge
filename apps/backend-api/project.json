@@ -7,10 +7,7 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "dependsOn": [
-        "^build",
-        { "projects": ["@echoforge/voice-cloning-addon"], "target": "build-f5-tts" }
-      ],
+      "dependsOn": ["^build"],
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "./dist/apps/backend-api",
@@ -97,7 +94,6 @@
     },
     "test": {
       "executor": "@nx/vite:test",
-      "dependsOn": [{ "projects": ["@echoforge/voice-cloning-addon"], "target": "build-f5-tts" }],
       "outputs": ["{workspaceRoot}/coverage/apps/backend-api"],
       "options": {
         "passWithNoTests": true,
