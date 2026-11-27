@@ -15,6 +15,12 @@ export const CloneVoiceSchema = z.object({
     .min(1, 'transcription must not be empty')
     .max(5000, 'transcription must be 5000 characters or fewer'),
 
+  sampleTranscript: z
+    .string()
+    .max(1000, 'sampleTranscript must be 1000 characters or fewer')
+    .optional()
+    .describe('What is said in the voice sample. If omitted, the sample is transcribed automatically.'),
+
   language: z
     .string()
     .optional()
@@ -82,6 +88,12 @@ export const UploadAndCloneSchema = z.object({
     .min(1, 'transcription must not be empty')
     .max(5000, 'transcription must be 5000 characters or fewer'),
 
+  sampleTranscript: z
+    .string()
+    .max(1000, 'sampleTranscript must be 1000 characters or fewer')
+    .optional()
+    .describe('What is said in the voice sample. If omitted, the sample is transcribed automatically.'),
+
   language: z
     .string()
     .optional()
@@ -90,7 +102,7 @@ export const UploadAndCloneSchema = z.object({
       message: 'language must be a valid language code (2-3 letters)',
     }),
 
-  speed: z
+  speed: z.coerce
     .number()
     .optional()
     .default(1.0)

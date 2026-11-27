@@ -1,13 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { StreamableFile } from '@nestjs/common';
 import { VoiceController } from './voice.controller';
 import { VoiceService } from '../services/voice.service';
 import { ErrorHandlerService } from '../services/error-handler.service';
 import { DatabaseService } from '../services/database.service';
 import { MetricsService } from '../services/metrics.service';
+import { StorageService } from '../services/storage.service';
+import { UploadAndCloneSchema } from './dto/voice-cloning.schemas';
 
 describe('VoiceController', () => {
   let voiceController: VoiceController;
   let voiceService: VoiceService;
+  let storageService: StorageService;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -16,13 +20,14 @@ describe('VoiceController', () => {
       getJobStatus: vi.fn(),
       downloadResult: vi.fn(),
     } as any;
+    storageService = { uploadFile: vi.fn().mockResolvedValue(undefined) } as unknown as StorageService;
 
     // The real error handler maps errors to HTTP statuses; its database and
     // metrics services are in-memory.
     const databaseService = new DatabaseService();
     const errorHandler = new ErrorHandlerService(databaseService, new MetricsService(databaseService));
 
-    voiceController = new VoiceController(voiceService, errorHandler);
+    voiceController = new VoiceController(voiceService, errorHandler, storageService);
   });
 
   it('should be defined', () => {
@@ -133,7 +138,12 @@ describe('VoiceController', () => {
       const result = await voiceController.downloadResult({ jobId: mockJobId });
 
       expect(voiceService.downloadResult).toHaveBeenCalledWith('test-job-id');
-      expect(result).toEqual(mockBuffer);
+      expect(result).toBeInstanceOf(StreamableFile);
+      expect(result.getHeaders()).toEqual({
+        type: 'audio/wav',
+        disposition: 'attachment; filename="test-job-id.wav"',
+        length: mockBuffer.length,
+      });
     });
 
     it('should handle job not completed errors', async () => {
@@ -148,6 +158,61 @@ describe('VoiceController', () => {
           status: 400,
         }),
       );
+    });
+  });
+
+  describe('cloneWithUpload', () => {
+    const req = { ip: '127.0.0.1', connection: { remoteAddress: '127.0.0.1' } } as any;
+    const file = (overrides: Record<string, unknown> = {}) => ({
+      fieldname: 'voiceSample',
+      originalname: 'my voice.wav',
+      mimetype: 'audio/wav',
+      size: 4,
+      buffer: Buffer.from('RIFF'),
+      ...overrides,
+    });
+    const body = UploadAndCloneSchema.parse({ transcription: 'Hello', sampleTranscript: 'My voice.', speed: '1.5' });
+
+    it('stores the uploaded sample and queues a job for it', async () => {
+      vi.mocked(voiceService.cloneVoice).mockResolvedValue({ jobId: 'a'.repeat(32), status: 'queued' });
+
+      await voiceController.cloneWithUpload(file(), body, req);
+
+      const [storedKey, data, contentType] = vi.mocked(storageService.uploadFile).mock.calls[0];
+      expect(storedKey).toMatch(/^uploads\/\d+-my-voice\.wav$/);
+      expect(data).toEqual(Buffer.from('RIFF'));
+      expect(contentType).toBe('audio/wav');
+      expect(voiceService.cloneVoice).toHaveBeenCalledWith(
+        {
+          voiceSampleFile: storedKey,
+          transcription: 'Hello',
+          sampleTranscript: 'My voice.',
+          language: 'en',
+          speed: 1.5,
+        },
+        '127.0.0.1',
+      );
+    });
+
+    it('rejects a missing file', async () => {
+      await expect(voiceController.cloneWithUpload(undefined as any, body, req)).rejects.toThrow(
+        expect.objectContaining({ status: 400 }),
+      );
+      expect(storageService.uploadFile).not.toHaveBeenCalled();
+    });
+
+    it('rejects a file that is not audio', async () => {
+      await expect(voiceController.cloneWithUpload(file({ mimetype: 'text/plain' }), body, req)).rejects.toThrow(
+        expect.objectContaining({ status: 400 }),
+      );
+      expect(storageService.uploadFile).not.toHaveBeenCalled();
+    });
+
+    it('rejects a sample larger than the inference service accepts', async () => {
+      await expect(
+        voiceController.cloneWithUpload(file({ size: 10 * 1024 * 1024 + 1 }), body, req),
+      ).rejects.toThrow(expect.objectContaining({ status: 413 }));
+      expect(storageService.uploadFile).not.toHaveBeenCalled();
     });
   });
 });

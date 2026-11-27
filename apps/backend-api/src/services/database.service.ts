@@ -5,6 +5,7 @@ export interface DatabaseVoiceCloningJob {
   id: string;
   voiceSampleFile: string;
   transcription: string;
+  sampleTranscript?: string;
   language?: string;
   speed?: number;
   status: 'pending' | 'processing' | 'completed' | 'failed';

@@ -8,6 +8,7 @@ import { DatabaseService } from '../services/database.service';
 import { MetricsService } from '../services/metrics.service';
 import { CleanupService } from '../services/cleanup.service';
 import { ErrorHandlerService } from '../services/error-handler.service';
+import { VoiceInferenceService } from '../services/voice-inference.service';
 import { AuthMiddleware } from '../middleware/auth.middleware';
 
 @Module({
@@ -20,6 +21,7 @@ import { AuthMiddleware } from '../middleware/auth.middleware';
     MetricsService,
     CleanupService,
     ErrorHandlerService,
+    VoiceInferenceService,
   ],
 })
 export class AppModule {

@@ -3,40 +3,17 @@ import { StorageService } from './storage.service';
 import { DatabaseService, DatabaseVoiceCloningJob } from './database.service';
 import { MetricsService } from './metrics.service';
 import { CleanupService } from './cleanup.service';
-
-// Mock interfaces for voice-cloning-addon (will be replaced with actual imports)
-interface CoreEngineConfig {
-  maxHeapMB?: number;
-  audioPoolSizeMB?: number;
-  cleanupThresholdPercent?: number;
-  f5ttsModelPath?: string;
-  f5ttsVocoderPath?: string;
-  useGPU?: boolean;
-  pythonServicePath?: string;
-  targetSampleRate?: number;
-  targetChannels?: number;
-  normalizationThreshold?: number;
-}
-
-interface VoiceCloner {
-  initialize(config?: CoreEngineConfig): Promise<boolean>;
-  isInitialized(): boolean;
-  extractVoiceEmbedding(audioData: Buffer | string): Promise<number[]>;
-  synthesizeSpeech(embedding: number[], text: string, language?: string, speed?: number): Promise<Buffer>;
-  cloneVoice(audioData: Buffer | string, text: string, language?: string, speed?: number): Promise<Buffer>;
-  loadModel(modelPath: string): Promise<boolean>;
-  loadVocoder(vocoderPath: string): Promise<boolean>;
-  getMemoryUsage(): Promise<number>;
-  clearCache(): Promise<void>;
-  getVersion(): string;
-}
+import { VoiceInferenceService } from './voice-inference.service';
 
 // Re-export database interfaces for backwards compatibility
 export type VoiceCloningJob = DatabaseVoiceCloningJob;
 
 export interface CloneVoiceRequest {
   voiceSampleFile: string;
+  /** Text to speak in the cloned voice */
   transcription: string;
+  /** What is said in the voice sample; without it the inference service transcribes the sample */
+  sampleTranscript?: string;
   language?: string;
   speed?: number;
 }
@@ -61,10 +38,8 @@ export interface JobStatusResponse {
 @Injectable()
 export class VoiceService {
   private readonly logger = new Logger(VoiceService.name);
-  private voiceCloner: VoiceCloner | null = null;
   private processingQueue: string[] = [];
   private isProcessing = false;
-  private requestCounts: Map<string, number> = new Map();
   private requestTimestamps: Map<string, number[]> = new Map();
 
   constructor(
@@ -72,33 +47,14 @@ export class VoiceService {
     private readonly databaseService: DatabaseService,
     private readonly metricsService: MetricsService,
     private readonly cleanupService: CleanupService,
+    private readonly voiceInference: VoiceInferenceService,
   ) {
-    this.initializeEngine();
-    
+    if (!this.voiceInference.isConfigured) {
+      this.logger.warn('VOICE_INFERENCE_URL is not set; voice cloning jobs will fail until it is');
+    }
+
     // Start background processing
     this.startBackgroundProcessing();
-  }
-
-  private async initializeEngine(): Promise<void> {
-    try {
-      // Initialize core engine with configuration
-      const config: CoreEngineConfig = {
-        maxHeapMB: parseInt(process.env['VOICE_CLONING_MAX_HEAP_MB'] || '2048'),
-        useGPU: process.env['VOICE_CLONING_USE_GPU'] === 'true',
-        f5ttsModelPath: process.env['F5TTS_MODEL_PATH'] || './models/f5-tts',
-        targetSampleRate: 22050,
-      };
-
-      // Mock engine initialization (will be replaced with actual coreEngine() call)
-      // const engine = await coreEngine();
-      // await engine.initialize(config);
-      // this.voiceCloner = await engine.createVoiceCloner(config);
-      
-      this.logger.log('Voice cloning engine initialized successfully (mock)');
-    } catch (error) {
-      this.logger.error('Failed to initialize voice cloning engine', error);
-      throw error;
-    }
   }
 
   async cloneVoice(request: CloneVoiceRequest, clientIp?: string): Promise<CloneVoiceResponse> {
@@ -122,6 +78,7 @@ export class VoiceService {
     const job = await this.databaseService.createJob({
       voiceSampleFile: request.voiceSampleFile,
       transcription: request.transcription,
+      sampleTranscript: request.sampleTranscript?.trim() || undefined,
       language: request.language || 'en',
       speed: request.speed || 1.0,
       status: 'pending',
@@ -172,10 +129,7 @@ export class VoiceService {
       throw new Error(`Job not completed or no output available: ${jobId}`);
     }
 
-    // In a real implementation, this would read from storage service
-    // For now, we'll return a placeholder
-    // TODO: Integrate with storage service for actual file download
-    return Buffer.from('Audio data placeholder');
+    return await this.storageService.downloadFile(job.outputFile);
   }
 
   private applyRateLimit(clientIp: string): void {
@@ -249,50 +203,40 @@ export class VoiceService {
         startedAt: new Date(),
       });
       
-      // Check if voice cloner is available
-      if (!this.voiceCloner) {
-        throw new Error('Voice cloning engine not initialized');
-      }
+      this.logger.log(`Processing job ${jobId}: downloading voice sample`);
+      const voiceSample = await this.storageService.downloadFile(job.voiceSampleFile);
 
-      // Download voice sample from storage using storage service
-      this.logger.log(`Processing job ${jobId}: Downloading voice sample from ${job.voiceSampleFile}`);
-      
-      // TODO: Actually download the file from storage service
-      // const voiceSample = await this.storageService.downloadFile(job.voiceSampleFile);
-      
-      // Clone the voice
-      this.logger.log(`Processing job ${jobId}: Cloning voice`);
-      
-      // Simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      this.logger.log(`Processing job ${jobId}: cloning voice`);
+      const result = await this.voiceInference.clone({
+        voiceSample,
+        voiceSampleFileName: job.voiceSampleFile.split('/').pop() || 'sample.wav',
+        text: job.transcription,
+        sampleTranscript: job.sampleTranscript,
+        speed: job.speed,
+      });
 
-      // Generate output file name
-      const outputFileName = `voice_results/${jobId}.wav`;
-      
-      // TODO: Actually save the result to storage service
-      // await this.storageService.uploadFile(outputFileName, generatedAudio);
+      const outputFileName = await this.storageService.generateVoiceResultFileName(jobId);
+      await this.storageService.uploadFile(outputFileName, result.audio, 'audio/wav');
 
-      // Update job status to completed
       const completedAt = new Date();
       const processingTimeMs = completedAt.getTime() - startTime;
-      
+      const audioDurationSeconds = wavDurationSeconds(result.audio);
+
       await this.databaseService.updateJob(jobId, {
         status: 'completed',
         outputFile: outputFileName,
         completedAt: completedAt,
         metadata: {
           processingTimeMs,
+          audioDurationSeconds,
           ...job.metadata,
         },
       });
 
-      // Record job metrics
       await this.databaseService.addJobMetrics({
         jobId,
         processingTimeMs,
-        audioDurationSeconds: 0, // TODO: Get actual duration
-        qualityScore: 0.95, // TODO: Calculate actual quality
-        voiceSimilarity: 0.9, // TODO: Calculate actual similarity
+        audioDurationSeconds,
       });
 
       // Record processing time in metrics service
@@ -372,4 +316,27 @@ export class VoiceService {
       this.processQueue();
     }
   }
+}
+/**
+ * Duration of a PCM WAV file in seconds, read from its fmt and data chunks.
+ * Returns undefined if the buffer isn't a WAV file it can read.
+ */
+export function wavDurationSeconds(wav: Buffer): number | undefined {
+  if (wav.length < 12 || wav.toString('ascii', 0, 4) !== 'RIFF' || wav.toString('ascii', 8, 12) !== 'WAVE') {
+    return undefined;
+  }
+  let byteRate: number | undefined;
+  let offset = 12;
+  while (offset + 8 <= wav.length) {
+    const chunkId = wav.toString('ascii', offset, offset + 4);
+    const chunkSize = wav.readUInt32LE(offset + 4);
+    const dataStart = offset + 8;
+    if (chunkId === 'fmt ' && dataStart + 12 <= wav.length) {
+      byteRate = wav.readUInt32LE(dataStart + 8);
+    } else if (chunkId === 'data' && byteRate) {
+      return chunkSize / byteRate;
+    }
+    offset = dataStart + chunkSize + (chunkSize % 2);
+  }
+  return undefined;
 }
