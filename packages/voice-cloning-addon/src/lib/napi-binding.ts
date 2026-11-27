@@ -412,7 +412,8 @@ export class NativeAudioProcessor implements AudioProcessor {
       samples: new Array(newLength),
       sampleRate: targetSampleRate,
       channels: audioData.channels,
-      duration: audioData.duration ? (audioData.duration * ratio) : undefined
+      // Resampling changes the sample count, not the length of the audio.
+      duration: audioData.duration
     };
     
     for (let i = 0; i < newLength; i++) {
