@@ -65,7 +65,7 @@
     },
     "deploy": {
       "executor": "nx:run-commands",
-      "dependsOn": ["docker-push"],
+      "dependsOn": ["docker-push", { "projects": ["voice-inference"], "target": "docker-push" }],
       "options": {
         "command": "terraform init && terraform apply -auto-approve"
       },

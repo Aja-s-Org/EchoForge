@@ -21,3 +21,13 @@ variable "gcp_region" {
   type        = string
   description = "The GCP region where Cloud Run resources are deployed"
 }
+
+variable "voice_inference_url" {
+  type        = string
+  description = "Base URL of the voice inference service the API sends clone jobs to"
+}
+
+variable "voice_inference_timeout_seconds" {
+  type        = number
+  description = "How long the API waits for one clone; matches the inference service's request timeout"
+}

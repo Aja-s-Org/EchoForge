@@ -9,7 +9,17 @@ resource "google_cloud_run_v2_service" "api" {
   template {
     # NEW: Tell Cloud Run to assume this specific identity!
     service_account = var.service_account_email
-    
+
+    # Jobs are kept in memory and processed in the background after the API
+    # answers 202, so (until there is a database and a queue) the API must be
+    # a single instance that keeps its CPU between requests. Otherwise a status
+    # request can land on an instance that doesn't know the job, and background
+    # processing is throttled once the request ends.
+    scaling {
+      min_instance_count = 1
+      max_instance_count = 1
+    }
+
     containers {
       image = var.docker_image
 
@@ -21,6 +31,20 @@ resource "google_cloud_run_v2_service" "api" {
       env {
         name  = "ECHOFORGE_SAMPLES_BUCKET"
         value = var.bucket_name
+      }
+      env {
+        name  = "VOICE_INFERENCE_URL"
+        value = var.voice_inference_url
+      }
+      env {
+        # Call the private inference service with this service account's identity token
+        name  = "VOICE_INFERENCE_AUTH"
+        value = "gcp-id-token"
+      }
+      env {
+        # Wait as long as the inference service allows a request to run
+        name  = "VOICE_INFERENCE_TIMEOUT_MS"
+        value = tostring(var.voice_inference_timeout_seconds * 1000)
       }
 
       # Standard port for NestJS
@@ -34,6 +58,8 @@ resource "google_cloud_run_v2_service" "api" {
           cpu    = "1"
           memory = "512Mi"
         }
+        # Keep CPU allocated outside requests for background job processing.
+        cpu_idle = false
       }
     }
   }

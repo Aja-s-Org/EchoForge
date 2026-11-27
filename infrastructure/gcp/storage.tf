@@ -28,3 +28,15 @@ resource "google_storage_bucket" "samples" {
     max_age_seconds = 3600
   }
 }
+
+# Model files for the voice inference service (F5-TTS, Vocos vocoder, Whisper),
+# staged with `nx run voice-inference:stage-models`. Unlike samples, these are
+# kept: no lifecycle rule. Regional, in the same region as Cloud Run, so the
+# service copies them quickly at startup.
+resource "google_storage_bucket" "models" {
+  name                        = "echoforge-models-${random_id.bucket_suffix.hex}"
+  location                    = upper(var.gcp_region)
+  force_destroy               = true
+  uniform_bucket_level_access = true
+  public_access_prevention    = "enforced"
+}
