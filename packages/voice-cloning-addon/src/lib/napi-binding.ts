@@ -91,6 +91,8 @@ let loadError: string | null = null;
 try {
   // Try multiple possible locations for the native addon
   const possiblePaths = [
+    // Explicit override, e.g. for a container image or a test fake
+    ...(process.env['VOICE_CLONING_ADDON_PATH'] ? [process.env['VOICE_CLONING_ADDON_PATH']] : []),
     // Production build path
     join(__dirname, '../../../build/Release/voice_cloning_addon.node'),
     // Debug build path
