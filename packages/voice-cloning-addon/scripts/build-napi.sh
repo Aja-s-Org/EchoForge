@@ -10,7 +10,7 @@ echo ""
 
 # Check if we're in the right directory
 if [ ! -f "package.json" ]; then
-  echo "Error: This script must be run from the core-engine package directory"
+  echo "Error: This script must be run from the voice-cloning-addon package directory"
   echo "Current directory: $(pwd)"
   exit 1
 fi

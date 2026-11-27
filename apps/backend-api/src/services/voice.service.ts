@@ -5,7 +5,7 @@ import { MetricsService } from './metrics.service';
 import { CleanupService } from './cleanup.service';
 import { randomBytes } from 'crypto';
 
-// Mock interfaces for core-engine (will be replaced with actual imports)
+// Mock interfaces for voice-cloning-addon (will be replaced with actual imports)
 interface CoreEngineConfig {
   maxHeapMB?: number;
   audioPoolSizeMB?: number;
