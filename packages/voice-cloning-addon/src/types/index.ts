@@ -9,6 +9,7 @@ export * from './transcription';
 export * from './output';
 export * from './voice-config';
 export * from './voice-errors';
+export * from './engine';
 
 /**
  * Re-export common types for convenience
