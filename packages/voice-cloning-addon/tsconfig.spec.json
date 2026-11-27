@@ -2,13 +2,15 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "../../coverage/packages/voice-cloning-addon",
-    "module": "commonjs",
-    "types": ["jest", "node"]
+    "module": "node16",
+    "types": ["vitest/globals", "node"]
   },
   "include": [
     "src/**/*.spec.ts",
     "src/**/*.test.ts",
     "src/**/*.d.ts",
-    "src/**/*.test-d.ts"
+    "src/**/*.test-d.ts",
+    "tests/**/*.test.ts",
+    "tests/**/*.spec.ts"
   ]
 }
