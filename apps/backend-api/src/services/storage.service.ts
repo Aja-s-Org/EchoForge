@@ -189,7 +189,7 @@ export class StorageService {
         
         const [metadata] = await file.getMetadata();
         
-        return parseInt(metadata.size || '0', 10);
+        return Number(metadata.size ?? 0);
       } else {
         throw new Error(`Cloud provider ${this.provider} not supported.`);
       }
@@ -199,7 +199,7 @@ export class StorageService {
     }
   }
 
-  async generateVoiceResultFileName(jobId: string, format: string = 'wav'): Promise<string> {
+  async generateVoiceResultFileName(jobId: string, format = 'wav'): Promise<string> {
     const timestamp = Date.now();
     return `voice_results/${jobId}-${timestamp}.${format}`;
   }

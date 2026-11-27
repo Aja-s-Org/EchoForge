@@ -143,8 +143,7 @@ export class CleanupService {
     }
   }
   
-  async cleanupOldJobs(): Promise<number> {
-    const maxAgeHours = this.config.maxJobAgeHours;
+  async cleanupOldJobs(maxAgeHours: number = this.config.maxJobAgeHours): Promise<number> {
     const cutoffTime = new Date();
     cutoffTime.setHours(cutoffTime.getHours() - maxAgeHours);
     
@@ -275,7 +274,7 @@ export class CleanupService {
     return this.runCleanup();
   }
   
-  async cleanupJob(jobId: string, deleteFiles: boolean = true): Promise<boolean> {
+  async cleanupJob(jobId: string, deleteFiles = true): Promise<boolean> {
     const startTime = Date.now();
     
     try {

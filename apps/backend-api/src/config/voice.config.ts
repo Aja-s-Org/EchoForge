@@ -317,20 +317,18 @@ export class VoiceConfigManager {
   }
   
   getConfigSummary(): Record<string, any> {
-    const summary: Record<string, any> = {};
-    
     // Only include non-sensitive config
-    summary.maxConcurrentJobs = this.config.maxConcurrentJobs;
-    summary.qualityPreset = this.config.qualityPreset;
-    summary.cacheEnabled = this.config.cacheEnabled;
-    summary.performanceMonitoring = this.config.performanceMonitoring;
-    summary.autoCleanup = this.config.autoCleanup;
-    summary.storageProvider = this.config.storageProvider;
-    summary.requireAuthentication = this.config.requireAuthentication;
-    summary.databaseType = this.config.databaseType;
-    summary.isValid = this.isConfigValid();
-    
-    return summary;
+    return {
+      maxConcurrentJobs: this.config.maxConcurrentJobs,
+      qualityPreset: this.config.qualityPreset,
+      cacheEnabled: this.config.cacheEnabled,
+      performanceMonitoring: this.config.performanceMonitoring,
+      autoCleanup: this.config.autoCleanup,
+      storageProvider: this.config.storageProvider,
+      requireAuthentication: this.config.requireAuthentication,
+      databaseType: this.config.databaseType,
+      isValid: this.isConfigValid(),
+    };
   }
   
   static createFromEnv(): VoiceConfigManager {

@@ -1,4 +1,4 @@
-import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
+import { ExecutionContext, Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 
 export interface AuthenticatedRequest extends Request {
@@ -167,7 +167,7 @@ export function RequirePermissions(...permissions: string[]) {
 export class AuthGuard {
   private readonly logger = new Logger(AuthGuard.name);
   
-  canActivate(context: any): boolean {
+  canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     
     if (!request.user) {
@@ -177,27 +177,4 @@ export class AuthGuard {
     
     return true;
   }
-}
-
-export function UseAuth() {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
-    const originalMethod = descriptor.value;
-    const guard = new AuthGuard();
-    
-    descriptor.value = async function (...args: any[]) {
-      const context = {
-        switchToHttp: () => ({
-          getRequest: () => args[0],
-        }),
-      };
-      
-      if (!guard.canActivate(context)) {
-        throw new Error('Authentication required');
-      }
-      
-      return originalMethod.apply(this, args);
-    };
-    
-    return descriptor;
-  };
 }

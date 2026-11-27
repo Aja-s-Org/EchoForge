@@ -251,7 +251,7 @@ export class DatabaseService {
     };
   }
 
-  async cleanupOldJobs(maxAgeHours: number = 24): Promise<number> {
+  async cleanupOldJobs(maxAgeHours = 24): Promise<number> {
     const startTime = Date.now();
     const cutoffTime = new Date();
     cutoffTime.setHours(cutoffTime.getHours() - maxAgeHours);
