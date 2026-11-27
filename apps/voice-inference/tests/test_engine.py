@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 
 from voice_inference.config import Settings
-from voice_inference.engine import CloneRequest, EngineNotReadyError, F5Engine
+from voice_inference.engine import CloneRequest, EngineNotReadyError, F5Engine, cpu_limit
 
 from .conftest import FakeF5TTS
 
@@ -108,3 +108,54 @@ def test_clears_caches_even_when_inference_fails(model_settings, fake_f5_tts, tm
         engine.clone(CloneRequest(sample_path=sample(tmp_path), text="Hello"))
 
     assert fake_f5_tts._ref_text_cache == {}
+
+
+def test_load_sets_torch_threads_to_the_cpu_limit(model_settings, fake_f5_tts, monkeypatch):
+    monkeypatch.setenv("TORCH_NUM_THREADS", "3")
+    F5Engine(model_settings).load()
+    assert fake_f5_tts.torch.threads == [3]
+
+
+class TestCpuLimit:
+    @pytest.fixture(autouse=True)
+    def many_cores(self, monkeypatch):
+        monkeypatch.delenv("TORCH_NUM_THREADS", raising=False)
+        monkeypatch.setattr(os, "cpu_count", lambda: 14)
+
+    def test_reads_cgroup_v2_quota(self, tmp_path):
+        (tmp_path / "cpu.max").write_text("400000 100000\n")
+        assert cpu_limit(tmp_path) == 4
+
+    def test_unlimited_cgroup_v2_uses_core_count(self, tmp_path):
+        (tmp_path / "cpu.max").write_text("max 100000\n")
+        assert cpu_limit(tmp_path) == 14
+
+    def test_reads_cgroup_v1_quota(self, tmp_path):
+        (tmp_path / "cpu").mkdir()
+        (tmp_path / "cpu" / "cpu.cfs_quota_us").write_text("200000\n")
+        (tmp_path / "cpu" / "cpu.cfs_period_us").write_text("100000\n")
+        assert cpu_limit(tmp_path) == 2
+
+    def test_fractional_quota_rounds_to_at_least_one(self, tmp_path):
+        (tmp_path / "cpu.max").write_text("25000 100000\n")
+        assert cpu_limit(tmp_path) == 1
+
+    def test_without_cgroup_files_uses_core_count(self, tmp_path):
+        assert cpu_limit(tmp_path) == 14
+
+    def test_environment_overrides(self, tmp_path, monkeypatch):
+        (tmp_path / "cpu.max").write_text("400000 100000\n")
+        monkeypatch.setenv("TORCH_NUM_THREADS", "6")
+        assert cpu_limit(tmp_path) == 6
+
+
+def test_keeps_f5_tts_output_with_request_text_out_of_stdout(model_settings, fake_f5_tts, tmp_path, capsys):
+    engine = F5Engine(model_settings)
+    engine.load()
+    capsys.readouterr()
+
+    engine.clone(CloneRequest(sample_path=sample(tmp_path), text="secret words", sample_transcript="my voice"))
+
+    output = capsys.readouterr()
+    assert "secret words" not in output.out + output.err
+    assert "my voice" not in output.out + output.err

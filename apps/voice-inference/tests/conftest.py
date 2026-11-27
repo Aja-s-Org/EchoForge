@@ -76,6 +76,8 @@ class FakeF5TTS:
         FakeF5TTS.instances.append(self)
 
     def infer(self, **kwargs: object):
+        # Like F5-TTS, print the request text to stdout.
+        print("gen_text", kwargs["gen_text"], "ref_text", kwargs["ref_text"])
         self.calls.append(kwargs)
         # Simulate F5-TTS caching the processed sample as a temp file.
         utils = sys.modules["f5_tts.infer.utils_infer"]
@@ -99,11 +101,16 @@ def fake_f5_tts(monkeypatch: pytest.MonkeyPatch) -> types.ModuleType:
     infer.utils_infer = utils
     package.api = api
     package.infer = infer
+    torch = types.ModuleType("torch")
+    torch.threads = []
+    torch.set_num_threads = torch.threads.append
+    utils.torch = torch  # lets tests check the thread count
     for name, module in {
         "f5_tts": package,
         "f5_tts.api": api,
         "f5_tts.infer": infer,
         "f5_tts.infer.utils_infer": utils,
+        "torch": torch,
     }.items():
         monkeypatch.setitem(sys.modules, name, module)
     return utils
