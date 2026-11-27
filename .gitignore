@@ -52,3 +52,6 @@ vitest.config.*.timestamp*
 
 # TypeScript incremental build info
 *.tsbuildinfo
+
+# Kiro specs and task output
+.kiro/
