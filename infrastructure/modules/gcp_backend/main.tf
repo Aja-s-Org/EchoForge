@@ -2,7 +2,7 @@
 resource "google_cloud_run_v2_service" "api" {
   name     = "${var.app_name}-api"
   location = var.gcp_region
-  
+
   # Cloud Run v2 handles ingress routing elegantly
   ingress = "INGRESS_TRAFFIC_ALL"
 
@@ -51,10 +51,10 @@ data "google_iam_policy" "noauth" {
 }
 
 # Allow public access (unauthenticated)
-resource "google_cloud_run_v2_service_iam_member" "noauth" {
-  location = google_cloud_run_v2_service.api.location
-  project  = google_cloud_run_v2_service.api.project
-  name     = google_cloud_run_v2_service.api.name
+resource "google_cloud_run_v2_service_iam_policy" "noauth" {
+  location    = google_cloud_run_v2_service.api.location
+  project     = google_cloud_run_v2_service.api.project
+  name        = google_cloud_run_v2_service.api.name
   policy_data = data.google_iam_policy.noauth.policy_data
 }
 
