@@ -24,3 +24,7 @@ node_modules/
 build/
 build_test/
 *.a
+
+# Python
+__pycache__/
+.pytest_cache/

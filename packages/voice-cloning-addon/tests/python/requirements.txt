@@ -1,0 +1,5 @@
+# Test dependencies for the voice cloning Python service.
+# f5-tts itself is stubbed in conftest.py, so PyTorch isn't needed here.
+pytest==8.4.2
+numpy>=1.26
+soundfile>=0.12

@@ -62,6 +62,13 @@
       "options": {
         "command": "bash packages/voice-cloning-addon/scripts/test-native.sh"
       }
+    },
+    "test-python": {
+      "executor": "nx:run-commands",
+      "inputs": ["{projectRoot}/src/python/**/*.py", "{projectRoot}/tests/python/**/*", "{projectRoot}/scripts/test-python.sh", { "env": "PYTHON" }],
+      "options": {
+        "command": "bash packages/voice-cloning-addon/scripts/test-python.sh"
+      }
     }
   }
 }
