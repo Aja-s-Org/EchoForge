@@ -49,3 +49,6 @@ vitest.config.*.timestamp*
 **/terraform.tfstate
 **/terraform.tfstate.backup
 **/.terraform.lock.hcl
+
+# TypeScript incremental build info
+*.tsbuildinfo
