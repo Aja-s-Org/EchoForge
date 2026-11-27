@@ -226,7 +226,9 @@ export class ErrorHandlerService {
       message.includes('validation') ||
       message.includes('missing') ||
       message.includes('required') ||
-      message.includes('format')
+      message.includes('format') ||
+      // e.g. downloading the result of a job that hasn't finished
+      message.includes('not completed')
     ) {
       return this.errorCategories.find(c => c.category === 'VALIDATION_ERROR')!;
     }
