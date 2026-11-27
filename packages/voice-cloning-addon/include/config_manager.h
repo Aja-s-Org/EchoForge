@@ -36,6 +36,8 @@ struct ConfigValue {
   ConfigValue() : type(ConfigValueType::STRING), int_value(0), float_value(0.0f), bool_value(false) {}
   
   ConfigValue(const std::string& val) : type(ConfigValueType::STRING), string_value(val), int_value(0), float_value(0.0f), bool_value(false) {}
+  // Without this, a string literal converts to bool and picks the bool overload.
+  ConfigValue(const char* val) : ConfigValue(std::string(val)) {}
   ConfigValue(int val) : type(ConfigValueType::INTEGER), int_value(val), float_value(0.0f), bool_value(false) {}
   ConfigValue(float val) : type(ConfigValueType::FLOAT), float_value(val), int_value(0), bool_value(false) {}
   ConfigValue(bool val) : type(ConfigValueType::BOOLEAN), bool_value(val), int_value(0), float_value(0.0f) {}
