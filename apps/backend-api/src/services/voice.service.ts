@@ -3,7 +3,6 @@ import { StorageService } from './storage.service';
 import { DatabaseService, DatabaseVoiceCloningJob } from './database.service';
 import { MetricsService } from './metrics.service';
 import { CleanupService } from './cleanup.service';
-import { randomBytes } from 'crypto';
 
 // Mock interfaces for voice-cloning-addon (will be replaced with actual imports)
 interface CoreEngineConfig {
@@ -119,8 +118,7 @@ export class VoiceService {
       throw new Error('Transcription too long. Maximum length is 5000 characters.');
     }
 
-    // Create a new job in database
-    const jobId = this.generateJobId();
+    // Create a new job in database; its ID is assigned by the database
     const job = await this.databaseService.createJob({
       voiceSampleFile: request.voiceSampleFile,
       transcription: request.transcription,
@@ -128,6 +126,7 @@ export class VoiceService {
       speed: request.speed || 1.0,
       status: 'pending',
     });
+    const jobId = job.id;
 
     this.processingQueue.push(jobId);
 
@@ -177,10 +176,6 @@ export class VoiceService {
     // For now, we'll return a placeholder
     // TODO: Integrate with storage service for actual file download
     return Buffer.from('Audio data placeholder');
-  }
-
-  private generateJobId(): string {
-    return randomBytes(16).toString('hex');
   }
 
   private applyRateLimit(clientIp: string): void {
