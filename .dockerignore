@@ -1,0 +1,16 @@
+# Docker builds use the repository root as context (see the docker-build
+# targets). Send only what the Dockerfiles copy or mount, not node_modules,
+# .git, caches or test virtualenvs.
+*
+
+# apps/backend-api/Dockerfile
+!dist/apps/backend-api/
+!dist/packages/storage-utils/
+
+# apps/voice-inference/Dockerfile
+!dist/third_party/f5-tts/wheel/
+!apps/voice-inference/requirements.txt
+!apps/voice-inference/src/
+
+# Never send Python caches
+**/__pycache__
