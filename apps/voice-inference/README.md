@@ -35,6 +35,14 @@ huggingface/               Hugging Face cache with openai/whisper-large-v3-turbo
                            used when a request has no sample_transcript
 ```
 
+`models.json` pins each of these to a Hugging Face commit. To fill a bucket:
+
+```bash
+MODEL_BUCKET=gs://BUCKET/models/v1 npx nx run voice-inference:stage-models
+```
+
+This downloads about 3 GB into `dist/models-staging`, arranges it in the layout above (Whisper as a Hugging Face cache snapshot, so it loads offline), and uploads whatever isn't already in the bucket. It needs `gcloud auth application-default login` with write access to the bucket. The F5-TTS checkpoint is licensed CC-BY-NC-4.0 (non-commercial); Vocos and Whisper are MIT.
+
 ## Configuration
 
 | Variable | Default | |

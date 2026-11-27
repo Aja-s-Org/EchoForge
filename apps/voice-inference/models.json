@@ -1,0 +1,42 @@
+{
+  "$comment": "Model files the inference service loads, pinned to Hugging Face commits. scripts/stage_models.py copies them into the models bucket in the layout the service expects (see README). Note the F5-TTS checkpoint is licensed CC-BY-NC-4.0 (non-commercial); Vocos and Whisper are MIT.",
+  "models": [
+    {
+      "repository": "SWivid/F5-TTS",
+      "revision": "84e5a410d9cead4de2f847e7c9369a6440bdfaca",
+      "license": "cc-by-nc-4.0",
+      "files": {
+        "F5TTS_v1_Base/model_1250000.safetensors": "f5-tts/model.safetensors",
+        "F5TTS_v1_Base/vocab.txt": "f5-tts/vocab.txt"
+      }
+    },
+    {
+      "repository": "charactr/vocos-mel-24khz",
+      "revision": "0feb3fdd929bcd6649e0e7c5a688cf7dd012ef21",
+      "license": "mit",
+      "files": {
+        "config.yaml": "vocos/config.yaml",
+        "pytorch_model.bin": "vocos/pytorch_model.bin"
+      }
+    },
+    {
+      "repository": "openai/whisper-large-v3-turbo",
+      "revision": "41f01f3fe87f28c78e2fbf8b568835947dd65ed9",
+      "license": "mit",
+      "huggingface_cache": true,
+      "files": {
+        "added_tokens.json": null,
+        "config.json": null,
+        "generation_config.json": null,
+        "merges.txt": null,
+        "model.safetensors": null,
+        "normalizer.json": null,
+        "preprocessor_config.json": null,
+        "special_tokens_map.json": null,
+        "tokenizer.json": null,
+        "tokenizer_config.json": null,
+        "vocab.json": null
+      }
+    }
+  ]
+}

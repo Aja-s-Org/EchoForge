@@ -30,6 +30,7 @@
         "{projectRoot}/src/**/*.py",
         "{projectRoot}/tests/**/*",
         "{projectRoot}/f5-tts.json",
+        "{projectRoot}/models.json",
         "{projectRoot}/requirements-test.txt",
         "{projectRoot}/pyproject.toml",
         "{projectRoot}/scripts/test.sh",
@@ -61,6 +62,12 @@
         "gcp": {
           "command": "docker push us-central1-docker.pkg.dev/echoforge-494507/echoforge-repo/voice-inference:latest"
         }
+      }
+    },
+    "stage-models": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bash apps/voice-inference/scripts/stage-models.sh"
       }
     }
   }
