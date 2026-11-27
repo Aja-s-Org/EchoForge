@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <chrono>
 #include <ctime>
+#include <unordered_map>
 #include <vector>
 
 namespace logging {
