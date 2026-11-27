@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { VoiceController } from './voice.controller';
 import { VoiceService } from '../services/voice.service';
+import { ErrorHandlerService } from '../services/error-handler.service';
+import { DatabaseService } from '../services/database.service';
+import { MetricsService } from '../services/metrics.service';
 
 describe('VoiceController', () => {
   let voiceController: VoiceController;
@@ -14,7 +17,12 @@ describe('VoiceController', () => {
       downloadResult: vi.fn(),
     } as any;
 
-    voiceController = new VoiceController(voiceService);
+    // The real error handler maps errors to HTTP statuses; its database and
+    // metrics services are in-memory.
+    const databaseService = new DatabaseService();
+    const errorHandler = new ErrorHandlerService(databaseService, new MetricsService(databaseService));
+
+    voiceController = new VoiceController(voiceService, errorHandler);
   });
 
   it('should be defined', () => {

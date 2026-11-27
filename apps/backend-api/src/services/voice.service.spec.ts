@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { VoiceService } from './voice.service';
 import { StorageService } from './storage.service';
+import { DatabaseService } from './database.service';
+import { MetricsService } from './metrics.service';
+import { CleanupService } from './cleanup.service';
 
 // Mock voice-cloning-addon
 vi.mock('@echoforge/voice-cloning-addon', () => {
@@ -29,7 +32,13 @@ describe('VoiceService', () => {
       fileExists: vi.fn().mockResolvedValue(true),
     } as any;
 
-    voiceService = new VoiceService(storageService);
+    // DatabaseService and MetricsService are in-memory, so use the real ones.
+    // CleanupService starts a timer on construction, so it is stubbed.
+    const databaseService = new DatabaseService();
+    const metricsService = new MetricsService(databaseService);
+    const cleanupService = { cleanupOldJobs: vi.fn().mockResolvedValue(0) } as unknown as CleanupService;
+
+    voiceService = new VoiceService(storageService, databaseService, metricsService, cleanupService);
   });
 
   it('should be defined', () => {
@@ -150,7 +159,7 @@ describe('VoiceService', () => {
 
   describe('queue stats', () => {
     it('should return accurate queue statistics', async () => {
-      const stats = voiceService.getQueueStats();
+      const stats = await voiceService.getQueueStats();
 
       expect(stats).toHaveProperty('totalJobs');
       expect(stats).toHaveProperty('pendingJobs');
