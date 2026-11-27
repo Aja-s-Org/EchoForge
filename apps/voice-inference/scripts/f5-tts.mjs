@@ -95,16 +95,42 @@ async function fetchSource() {
   console.log(`f5-tts: source ready in ${srcDir}`);
 }
 
+/** Files the service needs from the wheel; checked after every build. */
+const REQUIRED_WHEEL_FILES = ['f5_tts/api.py', 'f5_tts/configs/F5TTS_v1_Base.yaml'];
+
 function buildWheel(python) {
   rmSync(wheelDir, { recursive: true, force: true });
   mkdirSync(wheelDir, { recursive: true });
-  // The archive has no .git, so tell setuptools-scm the version explicitly.
+  // F5-TTS relies on setuptools-scm to pick the package data files (model
+  // configs, example audio) from git, and the archive has no .git, so list them
+  // in a MANIFEST.in instead. Without it the wheel only contains .py files.
+  writeFileSync(
+    join(srcDir, 'MANIFEST.in'),
+    'graft src/f5_tts\nglobal-exclude __pycache__ *.py[cod]\n',
+  );
+  // Likewise tell setuptools-scm the version explicitly.
   const env = { ...process.env, SETUPTOOLS_SCM_PRETEND_VERSION: pin.version };
   run(python, ['-m', 'pip', 'wheel', '--no-deps', '--wheel-dir', wheelDir, srcDir], { env });
   const wheel = readdirSync(wheelDir).find((name) => name.endsWith('.whl'));
   if (!wheel) fail(`no wheel produced in ${wheelDir}`);
-  console.log(`f5-tts: built ${join(wheelDir, wheel)}`);
-  return join(wheelDir, wheel);
+  const wheelPath = join(wheelDir, wheel);
+  checkWheel(python, wheelPath);
+  console.log(`f5-tts: built ${wheelPath}`);
+  return wheelPath;
+}
+
+function checkWheel(python, wheelPath) {
+  const script = [
+    'import sys, zipfile',
+    'names = set(zipfile.ZipFile(sys.argv[1]).namelist())',
+    'missing = [name for name in sys.argv[2:] if name not in names]',
+    'print("\\n".join(missing))',
+    'sys.exit(1 if missing else 0)',
+  ].join('\n');
+  const result = spawnSync(python, ['-c', script, wheelPath, ...REQUIRED_WHEEL_FILES], { encoding: 'utf8' });
+  if (result.status !== 0) {
+    fail(`wheel is missing required files:\n${result.stdout}${result.stderr}`);
+  }
 }
 
 const command = process.argv[2];
