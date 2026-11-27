@@ -25,7 +25,7 @@
     "default": {
       "runner": "nx/tasks-runners/default",
       "options": {
-        "cacheableOperations": ["build", "coverage", "lint"],
+        "cacheableOperations": ["build", "coverage", "lint", "fetch-f5-tts", "build-f5-tts"],
         "useLegacyCache": true
       }
     }

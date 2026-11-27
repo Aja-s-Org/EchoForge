@@ -53,15 +53,17 @@ npm install
 
 ## f5-tts Library
 
-The f5-tts library is included as a git submodule. To initialize and update it:
+f5-tts is not committed to this repository. `f5-tts.json` pins a release by tag and commit SHA,
+and the `fetch-f5-tts` / `build-f5-tts` Nx targets download that source archive from GitHub and
+build a wheel into `dist/third_party/f5-tts`. Both targets are cached by Nx, and `backend-api`'s
+build and test targets depend on `build-f5-tts`.
 
 ```bash
 # From the monorepo root
-git submodule update --init --recursive
-
-# To update to latest version
-git submodule update --remote third_party/f5-tts
+npx nx run @echoforge/voice-cloning-addon:build-f5-tts
 ```
+
+To upgrade, change `version` and `commit` in `f5-tts.json` (and clear or update `sha256`).
 
 ## Building the Addon
 
@@ -69,7 +71,7 @@ After installing all dependencies, build the addon:
 
 ```bash
 cd packages/voice-cloning-addon
-npm run build:cpp
+npm run build:native
 ```
 
 ## Verification
@@ -87,7 +89,7 @@ clang++ --version  # or g++ --version
 node-gyp --version
 
 # Test build
-npm run build:cpp
+npm run build:native
 ```
 
 ## Troubleshooting
@@ -171,14 +173,11 @@ The f5-tts library requires Python 3.10+ and PyTorch. To install Python dependen
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install f5-tts from submodule
-cd third_party/f5-tts
-pip install -e .
+# Build the pinned f5-tts wheel and install it with its dependencies
+# (from packages/voice-cloning-addon)
+npm run setup:python
 
-# For GPU support (requires CUDA)
-pip install -e .[gpu]
-
-# Or install specific PyTorch version for your hardware
+# For GPU support, install the PyTorch build for your CUDA version first
 # See f5-tts README for detailed instructions
 ```
 

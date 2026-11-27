@@ -10,13 +10,13 @@ import { join } from 'path';
 describe('Dependency Verification', () => {
   const projectRoot = join(__dirname, '..');
   
-  test('f5-tts submodule exists', () => {
-    const f5ttsPath = join(projectRoot, '..', '..', 'third_party', 'f5-tts');
-    expect(existsSync(f5ttsPath)).toBe(true);
-    
-    // Check for key f5-tts files
-    expect(existsSync(join(f5ttsPath, 'README.md'))).toBe(true);
-    expect(existsSync(join(f5ttsPath, 'pyproject.toml'))).toBe(true);
+  test('f5-tts release is pinned', () => {
+    // f5-tts is downloaded at build time (nx run @echoforge/voice-cloning-addon:build-f5-tts),
+    // so only the pin is checked here.
+    const pin = require(join(projectRoot, 'f5-tts.json'));
+    expect(pin.repository).toBe('SWivid/F5-TTS');
+    expect(pin.version).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(pin.commit).toMatch(/^[0-9a-f]{40}$/);
   });
 
   test('package.json has required dependencies', () => {

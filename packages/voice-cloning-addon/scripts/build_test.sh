@@ -86,7 +86,7 @@ echo "3. Checking source file syntax..."
 if command -v g++ &> /dev/null; then
   # Check C++ syntax for wrapper files
   echo "  Checking f5_tts_wrapper.h..."
-  if g++ -std=c++17 -c -Iinclude -I../../third_party/f5-tts/src -o /dev/null include/f5_tts_wrapper.h 2>&1; then
+  if g++ -std=c++17 -c -Iinclude -o /dev/null include/f5_tts_wrapper.h 2>&1; then
     echo "    ✓ f5_tts_wrapper.h compiles"
   else
     echo "    ✗ f5_tts_wrapper.h has syntax errors"
@@ -109,14 +109,6 @@ echo
 echo "4. Checking binding.gyp integration..."
 if [ -f "binding.gyp" ]; then
   echo "  ✓ binding.gyp exists"
-  
-  # Check if f5-tts include directory is referenced
-  if grep -q "third_party/f5-tts/src" binding.gyp; then
-    echo "    ✓ f5-tts include directory referenced"
-  else
-    echo "    ✗ f5-tts include directory not referenced"
-    exit 1
-  fi
   
   # Check for required libraries
   if grep -q "lsndfile" binding.gyp; then
