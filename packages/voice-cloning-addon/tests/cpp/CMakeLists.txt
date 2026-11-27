@@ -9,8 +9,8 @@
 #
 # Or via Nx: nx run @echoforge/voice-cloning-addon:test-native
 #
-# Needs: a C++17 compiler, CMake, pkg-config, libsndfile and GoogleTest
-# (Ubuntu: build-essential cmake pkg-config libsndfile1-dev libgtest-dev).
+# Needs: a C++17 compiler, CMake, pkg-config, libsndfile, PortAudio and GoogleTest
+# (Ubuntu: build-essential cmake pkg-config libsndfile1-dev portaudio19-dev libgtest-dev).
 cmake_minimum_required(VERSION 3.16)
 project(voice_cloning_addon_tests LANGUAGES CXX)
 
@@ -24,6 +24,8 @@ find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(SNDFILE REQUIRED IMPORTED_TARGET sndfile)
+# audio_processor.h includes <portaudio.h>.
+pkg_check_modules(PORTAUDIO REQUIRED IMPORTED_TARGET portaudio-2.0)
 
 # Core sources that don't depend on Node-API.
 # memory_pool.cc is left out: it implements AudioBufferPool, which
@@ -35,7 +37,7 @@ add_library(voice_cloning_core STATIC
   ${ADDON_ROOT}/src/cpp/f5_tts_wrapper.cc
 )
 target_include_directories(voice_cloning_core PUBLIC ${ADDON_ROOT}/include)
-target_link_libraries(voice_cloning_core PUBLIC PkgConfig::SNDFILE Threads::Threads)
+target_link_libraries(voice_cloning_core PUBLIC PkgConfig::SNDFILE PkgConfig::PORTAUDIO Threads::Threads)
 
 add_executable(voice_cloning_tests
   test_audio_processor.cc
