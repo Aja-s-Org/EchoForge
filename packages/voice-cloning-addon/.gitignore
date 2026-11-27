@@ -20,9 +20,7 @@ node_modules/
 *.log
 *.tmp
 
-# CMake build output (keep the hand-written scratch test sources)
+# CMake build output
 build/
-build_test/*
-!build_test/CMakeLists.txt
-!build_test/test_core.cc
+build_test/
 *.a
