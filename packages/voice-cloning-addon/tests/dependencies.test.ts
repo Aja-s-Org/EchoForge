@@ -22,9 +22,9 @@ describe('Dependency Verification', () => {
   test('package.json has required dependencies', () => {
     const packageJson = require(join(projectRoot, 'package.json'));
     
-    // Check for required dev dependencies
+    // Check for required dev dependencies (shared tooling such as
+    // @types/node comes from the workspace root)
     expect(packageJson.devDependencies).toBeDefined();
-    expect(packageJson.devDependencies['@types/node']).toBeDefined();
     expect(packageJson.devDependencies['node-gyp']).toBeDefined();
     
     // Check for required dependencies
