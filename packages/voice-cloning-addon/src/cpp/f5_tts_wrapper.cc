@@ -252,6 +252,7 @@ VoiceCloningResult F5TTSWrapper::clone_voice(const VoiceCloningInput& input) {
 
 bool F5TTSWrapper::load_model(const std::string& model_path) {
   config_.model_path = model_path;
+  impl_->update_config(config_);
   get_f5tts_logger().info("Model path updated to: " + model_path);
   
   // Re-initialize with new model if already initialized
@@ -265,6 +266,7 @@ bool F5TTSWrapper::load_model(const std::string& model_path) {
 
 bool F5TTSWrapper::load_vocoder(const std::string& vocoder_path) {
   config_.vocoder_path = vocoder_path;
+  impl_->update_config(config_);
   get_f5tts_logger().info("Vocoder path updated to: " + vocoder_path);
   
   // Re-initialize with new vocoder if already initialized
