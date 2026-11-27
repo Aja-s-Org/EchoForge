@@ -4,8 +4,28 @@
   "projectType": "library",
   "tags": ["type:addon", "type:native"],
   "targets": {
+    "fetch-f5-tts": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["{projectRoot}/f5-tts.json", "{projectRoot}/scripts/f5-tts.mjs"],
+      "outputs": ["{workspaceRoot}/dist/third_party/f5-tts/src"],
+      "options": {
+        "command": "node packages/voice-cloning-addon/scripts/f5-tts.mjs fetch"
+      }
+    },
+    "build-f5-tts": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "dependsOn": ["fetch-f5-tts"],
+      "inputs": ["{projectRoot}/f5-tts.json", "{projectRoot}/scripts/f5-tts.mjs", { "env": "PYTHON" }],
+      "outputs": ["{workspaceRoot}/dist/third_party/f5-tts/wheel"],
+      "options": {
+        "command": "node packages/voice-cloning-addon/scripts/f5-tts.mjs wheel"
+      }
+    },
     "build": {
       "executor": "@nx/js:tsc",
+      "dependsOn": ["^build", "build-f5-tts"],
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "./dist/packages/voice-cloning-addon",

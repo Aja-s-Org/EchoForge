@@ -20,12 +20,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/src/cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/../../third_party/f5-tts/src
 )
-
-# F5-TTS library configuration
-set(F5_TTS_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../third_party/f5-tts)
-set(F5_TTS_INCLUDE_DIR ${F5_TTS_SOURCE_DIR}/src)
 
 # Find required libraries
 find_package(PortAudio QUIET)
@@ -112,7 +107,6 @@ add_library(f5_tts_wrapper STATIC
 
 target_include_directories(f5_tts_wrapper
   PRIVATE
-    ${F5_TTS_INCLUDE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 

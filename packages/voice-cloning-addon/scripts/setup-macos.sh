@@ -38,9 +38,9 @@ echo ""
 echo "System dependencies installation complete!"
 echo ""
 echo "Next steps:"
-echo "1. Initialize git submodule: git submodule update --init --recursive"
+echo "1. Fetch and build f5-tts: npx nx run @echoforge/voice-cloning-addon:build-f5-tts"
 echo "2. Install Node.js dependencies: npm install"
-echo "3. Build the addon: npm run build:cpp"
+echo "3. Build the addon: npm run build:native"
 # Install Python dependencies (if using Python integration)
 echo "Checking Python environment..."
 if command -v python3 &> /dev/null; then

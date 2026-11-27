@@ -84,7 +84,7 @@ const exampleJob: VoiceCloningJob = {
  * Example usage of VoiceCloningBuildConfig interface
  */
 const exampleBuildConfig: VoiceCloningBuildConfig = {
-  f5ttsPath: './third_party/f5-tts',
+  f5ttsPath: './dist/third_party/f5-tts/src',
   modelPath: './models/f5-tts',
   maxAudioDuration: 30,
   supportedFormats: ['wav', 'mp3'],

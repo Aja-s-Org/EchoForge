@@ -14,8 +14,7 @@
       "include_dirs": [
         "<!@(node -p \"require('node-addon-api').include\")",
         "include",
-        "src/cpp",
-        "../../third_party/f5-tts/src"
+        "src/cpp"
       ],
       "dependencies": [
         "<!(node -p \"require('node-addon-api').gyp\")"

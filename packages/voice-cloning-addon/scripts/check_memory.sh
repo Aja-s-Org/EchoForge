@@ -142,7 +142,7 @@ echo "=== Recommendations ==="
 echo ""
 
 echo "To verify memory management is working:"
-echo "1. Build the project: npm run build:cpp"
+echo "1. Build the project: npm run build:native"
 echo "2. Run memory tests: ./build_test/test_core"
 echo "3. Check for memory leaks with valgrind: valgrind --leak-check=full ./build_test/test_core"
 echo "4. Monitor memory usage during voice cloning operations"

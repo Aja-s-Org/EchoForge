@@ -52,14 +52,16 @@ Install via Chocolatey or manually:
 
 ### Installing Dependencies
 
-1. **Initialize f5-tts submodule**:
-   ```bash
-   git submodule update --init --recursive
-   ```
-
-2. **Install Node.js dependencies**:
+1. **Install Node.js dependencies** (this no longer compiles the native addon):
    ```bash
    npm install
+   ```
+
+2. **Fetch and build f5-tts**: the version is pinned in `f5-tts.json` and downloaded from GitHub
+   at build time into `dist/third_party/f5-tts`. Nx caches the result, and `backend-api`'s build
+   and tests run it automatically.
+   ```bash
+   npx nx run @echoforge/voice-cloning-addon:build-f5-tts
    ```
 
 3. **Verify installation**:
@@ -67,9 +69,9 @@ Install via Chocolatey or manually:
    ./scripts/verify-deps.sh
    ```
 
-4. **Build the addon**:
+4. **Build the native addon**:
    ```bash
-   npm run build:cpp
+   npm run build:native
    ```
 
 For detailed installation instructions, see [INSTALL.md](INSTALL.md).

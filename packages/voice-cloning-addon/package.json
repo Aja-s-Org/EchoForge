@@ -21,10 +21,10 @@
     "build": "nx build @echoforge/voice-cloning-addon",
     "build:native": "node-gyp rebuild",
     "clean": "rimraf build",
-    "install": "node-gyp rebuild",
-    "setup:python": "cd ../../third_party/f5-tts && pip install -e .",
-    "setup:python:gpu": "cd ../../third_party/f5-tts && pip install -e .[gpu]",
+    "fetch:f5-tts": "nx run @echoforge/voice-cloning-addon:fetch-f5-tts",
+    "build:f5-tts": "nx run @echoforge/voice-cloning-addon:build-f5-tts",
+    "setup:python": "node scripts/f5-tts.mjs install",
     "check:memory": "./scripts/check_memory.sh"
   },
-  "gypfile": true
+  "gypfile": false
 }
