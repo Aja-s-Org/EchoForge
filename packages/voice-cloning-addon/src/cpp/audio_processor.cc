@@ -364,11 +364,11 @@ AudioMetadata AudioProcessor::get_metadata(const std::string& filepath) {
   metadata.duration = static_cast<double>(sfinfo.frames) / sfinfo.samplerate;
   
   // Determine format
-  if (sfinfo.format & SF_FORMAT_WAV) {
+  if ((sfinfo.format & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV) {
     metadata.format = AudioFormat::WAV;
-  } else if (sfinfo.format & SF_FORMAT_FLAC) {
+  } else if ((sfinfo.format & SF_FORMAT_TYPEMASK) == SF_FORMAT_FLAC) {
     metadata.format = AudioFormat::FLAC;
-  } else if (sfinfo.format & SF_FORMAT_OGG) {
+  } else if ((sfinfo.format & SF_FORMAT_TYPEMASK) == SF_FORMAT_OGG) {
     metadata.format = AudioFormat::OGG;
   } else {
     metadata.format = AudioFormat::UNKNOWN;
@@ -459,11 +459,11 @@ AudioData AudioProcessor::load_with_libsndfile(const std::string& filepath) {
   audio.channels = sfinfo.channels;
   
   // Determine format
-  if (sfinfo.format & SF_FORMAT_WAV) {
+  if ((sfinfo.format & SF_FORMAT_TYPEMASK) == SF_FORMAT_WAV) {
     audio.format = AudioFormat::WAV;
-  } else if (sfinfo.format & SF_FORMAT_FLAC) {
+  } else if ((sfinfo.format & SF_FORMAT_TYPEMASK) == SF_FORMAT_FLAC) {
     audio.format = AudioFormat::FLAC;
-  } else if (sfinfo.format & SF_FORMAT_OGG) {
+  } else if ((sfinfo.format & SF_FORMAT_TYPEMASK) == SF_FORMAT_OGG) {
     audio.format = AudioFormat::OGG;
   } else {
     audio.format = AudioFormat::UNKNOWN;
