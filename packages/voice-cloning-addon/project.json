@@ -55,6 +55,13 @@
           "reporter": ["text", "json", "html", "json-summary"]
         }
       }
+    },
+    "test-native": {
+      "executor": "nx:run-commands",
+      "inputs": ["{projectRoot}/include/**/*", "{projectRoot}/src/cpp/**/*", "{projectRoot}/tests/cpp/**/*", "{projectRoot}/scripts/test-native.sh"],
+      "options": {
+        "command": "bash packages/voice-cloning-addon/scripts/test-native.sh"
+      }
     }
   }
 }

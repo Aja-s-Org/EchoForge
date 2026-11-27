@@ -115,39 +115,10 @@ target_link_libraries(f5_tts_wrapper
     ${jsoncpp_LIBRARIES}
 )
 
-# Tests
+# Tests (standalone project; also run by `nx run @echoforge/voice-cloning-addon:test-native`)
 if(BUILD_TESTING)
   enable_testing()
-  
-  # Add Google Test
-  include(FetchContent)
-  FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.tar.gz
-  )
-  
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-  FetchContent_MakeAvailable(googletest)
-  
-  # Test executable
-  add_executable(voice_cloning_tests
-    tests/cpp/test_voice_cloner.cc
-    tests/cpp/test_audio_processor.cc
-    tests/cpp/test_basic.cc
-    tests/cpp/test_end_to_end.cc
-  )
-  
-  target_link_libraries(voice_cloning_tests
-    PRIVATE
-      GTest::gtest_main
-      voice_cloning_addon
-      f5_tts_wrapper
-      ${PortAudio_LIBRARIES}
-      ${SndFile_LIBRARIES}
-  )
-  
-  include(GoogleTest)
-  gtest_discover_tests(voice_cloning_tests)
+  add_subdirectory(tests/cpp)
 endif()
 
 # Set compiler flags
@@ -217,27 +188,6 @@ install(TARGETS voice_cloning_addon
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
 )
-
-# Test executable
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/cpp/test_basic.cc")
-  add_executable(test_core
-    tests/cpp/test_basic.cc
-    ${ADDON_SOURCES}
-  )
-  
-  target_link_libraries(test_core
-    PRIVATE
-      ${PortAudio_LIBRARIES}
-      ${SndFile_LIBRARIES}
-      ${JSONCPP_LIBRARIES}
-      GTest::gtest
-      GTest::gtest_main
-  )
-  
-  set_target_properties(test_core PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests
-  )
-endif()
 
 message(STATUS "Memory management components added to build")
 message(STATUS "Total source files: ${ADDON_SOURCES}")
